@@ -1,0 +1,17 @@
+{
+    "name": "davi/try",
+    "autoload": {
+        "psr-4": {
+            "Davi\\Try\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "davi"
+        }
+    ],
+    "require": {
+        "firebase/php-jwt": "^6.5"
+    },
+    "minimum-stability": "dev"
+}
