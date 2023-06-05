@@ -43,6 +43,6 @@
             'email' => $usuario->getEmail(),
             'nick' => $usuario->getNick(),
             'data_nasc' => date("d/m/Y", strtotime($usuario->getDataNasc()))
-        )
+        ), JSON_UNESCAPED_UNICODE
     );
 ?>
