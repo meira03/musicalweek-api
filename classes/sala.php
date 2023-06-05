@@ -62,13 +62,21 @@
         }
         public function getInfo($conn) {
             $stmt = $conn->prepare(
-                'SELECT B.nome AS sala, b.data_inicio + ordem_sala AS tempo_restante, C.nome genero
-                    from MusicaSala A
+                'SELECT B.nome AS sala, b.data_inicio + T.ordem_sala AS tempo_restante,T.ordem_sala, C.nome genero
+                from MusicaSala A
+        INNER JOIN Sala B on A.id_sala = B.id_sala
+        INNER JOIN Genero C on A.id_genero = C.id_genero
+        LEFT JOIN (SELECT top 1 B.id_sala, ordem_sala from MusicaSala A
             INNER JOIN Sala B on A.id_sala = B.id_sala
-            INNER JOIN Genero C on A.id_genero = C.id_genero
-            where A.id_musicasala = :id_musicasala
+            where :dataatual < B.data_criacao + ordem_sala
+            and A.id_sala = (select id_sala from MusicaSala where id_musicasala = :id_musicasala)
+            order by ordem_sala) as T ON A.id_sala = T.id_sala
+        where A.id_musicasala = :idmusicasala
             ');
             $stmt->bindParam(':id_musicasala', $this->idMusicaSala);
+            $stmt->bindParam(':idmusicasala', $this->idMusicaSala);
+            $stmt->bindParam(':dataatual', $dataatual);
+            $dataatual = date("Y-m-d H:i:s");
             $stmt->execute();
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
