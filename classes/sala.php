@@ -9,22 +9,25 @@
         public function buscaSalas($conn, $idUsuario) {
             $query = 
             "SELECT
-                MS.id_musicasala AS id_musica_sala,
-                S.nome AS nome_sala,
-                G.nome AS genero,
-                (SELECT TOP 1 A.id_musica
-                FROM 
-                    MusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
-                WHERE 
-                    :dataatual < B.data_criacao + ordem_sala AND A.id_sala = MS.id_sala
-                ORDER BY 
-                    A.ordem_sala) AS id_musica
-            FROM
-                MusicaSala MS
-                INNER JOIN Sala S ON MS.id_sala = S.id_sala
-                INNER JOIN Genero G ON MS.id_genero = G.id_genero
-            WHERE
-                MS.id_usuario = :id_usuario;";
+            MS.id_musicasala AS id_musica_sala,
+            S.nome AS nome_sala,
+            G.nome AS genero, 
+            isnull((SELECT TOP 1 A.id_musica
+             FROM 
+                MusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
+             WHERE 
+             :dataatual < B.data_criacao + ordem_sala AND A.id_sala = MS.id_sala
+             ORDER BY 
+                A.ordem_sala),(select TOP 1 A.id_musica
+             FROM 
+                MusicaSala A WHERE 
+                A.id_musicasala = MS.id_musicasala)) AS id_musica
+        FROM
+            MusicaSala MS
+            LEFT JOIN Sala S ON MS.id_sala = S.id_sala
+            INNER JOIN Genero G ON MS.id_genero = G.id_genero
+        WHERE
+            MS.id_usuario = :id_usuario";
             $stmt = $conn->prepare($query);
             $stmt->bindParam(':id_usuario', $idUsuario);
             $stmt->bindParam(':dataatual', $dataAtual);
@@ -96,7 +99,7 @@
 
             $data_final = date("Y-m-d H:i:s", strtotime($data_inicio . " + $qtd_usuarios days"));
 
-            return $data_final < date("Y-m-d H:i:s"); 
+            return $data_final < date("Y-m-d H:i:s");
         }
 
         private function getParticipantes($conn) {
