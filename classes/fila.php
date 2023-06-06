@@ -42,8 +42,8 @@
             $this->preparaGenero($conn);
 
             $insert = $conn->prepare(
-            "INSERT INTO [dbo].[MusicaSala] (id_usuario, id_musica, id_genero, data_adicao_musica) 
-            VALUES (:usuario, :musica, :genero, :dataadicao)"
+            "INSERT INTO [dbo].[MusicaSala] (id_usuario, id_musica, id_genero, data_adicao_musica, usuario_status) 
+            VALUES (:usuario, :musica, :genero, :dataadicao, 0)"
             );
 
             $insert->bindParam(':usuario', $this->idUsuario);
