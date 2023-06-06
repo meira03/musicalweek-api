@@ -50,6 +50,9 @@
 
         if ($avaliacao->registra($conn)) {
             http_response_code(200);
+            echo json_encode(array(
+                "sucesso" => true,
+            ), JSON_UNESCAPED_UNICODE);
         } else {
             http_response_code(409);
             echo json_encode(array(
