@@ -56,9 +56,9 @@
             $insert->execute();
 
             $select = $conn->prepare(
-                "SELECT top 1 id_musicasala from MusicaSala where id_usuario = 182 order by id_musicasala desc"
+                "SELECT top 1 id_musicasala from MusicaSala where id_usuario = :usuario order by id_musicasala desc"
             );
-            $select->bindParam(':nome', $this->idUsuario);
+            $select->bindParam(':usuario', $this->idUsuario);
             $select->execute();
             $id = $select->fetchColumn();
 
