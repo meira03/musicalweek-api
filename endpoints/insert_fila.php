@@ -17,16 +17,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $vars = json_decode(file_get_contents('php://input'), true);
 
-if(!isset($vars['id_usuario']) || !isset($vars['id_musica']) || !isset($vars['nome_genero'])) {
+if(!isset($vars['id_usuario']) || !isset($vars['id_musica'])) {
     $response = array();
     if (!isset($vars['id_usuario'])){
         $response['id_usuario'] = null;
     }
     if (!isset($vars['id_musica'])){
         $response['id_musica'] = null;
-    }
-    if (!isset($vars['nome_genero'])){
-        $response['nome_genero'] = null;
     }
     echo json_encode($response);
     exit();
@@ -35,7 +32,7 @@ if(!isset($vars['id_usuario']) || !isset($vars['id_musica']) || !isset($vars['no
 include("../db/dbconexao.php");
 include("../classes/fila.php");
 
-$fila = new Fila($vars['id_usuario'], $vars['id_musica'], $vars['nome_genero']);
+$fila = new Fila($vars['id_usuario'], $vars['id_musica']);
 
 try {
     echo json_encode(array(

@@ -11,7 +11,6 @@
             "SELECT
             MS.id_musicasala AS id_musica_sala,
             S.nome AS nome_sala,
-            G.nome AS genero, 
             isnull((SELECT TOP 1 A.id_musica
              FROM 
                 MusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
@@ -25,7 +24,6 @@
         FROM
             MusicaSala MS
             LEFT JOIN Sala S ON MS.id_sala = S.id_sala
-            INNER JOIN Genero G ON MS.id_genero = G.id_genero
         WHERE
             MS.id_usuario = :id_usuario";
             $stmt = $conn->prepare($query);
@@ -51,9 +49,8 @@
 
         public function getFila($conn) {
             $stmt = $conn->prepare(
-                'SELECT MS.id_sala AS sala, G.nome AS genero, MS.id_musica AS musica
+                'SELECT MS.id_sala AS sala, MS.id_musica AS musica
                 FROM MusicaSala MS
-                LEFT JOIN Genero G ON MS.id_genero = G.id_genero
                 WHERE MS.id_musicasala = :id_musicasala;');
             $stmt->bindParam(':id_musicasala', $this->idMusicaSala);
             $stmt->execute();
@@ -62,10 +59,9 @@
         }
         public function getInfo($conn) {
             $stmt = $conn->prepare(
-                'SELECT B.nome AS sala, b.data_inicio + T.ordem_sala AS tempo_restante,T.ordem_sala, C.nome genero
+                'SELECT B.nome AS sala, b.data_inicio + T.ordem_sala AS tempo_restante,T.ordem_sala
                 from MusicaSala A
         INNER JOIN Sala B on A.id_sala = B.id_sala
-        INNER JOIN Genero C on A.id_genero = C.id_genero
         LEFT JOIN (SELECT top 1 B.id_sala, ordem_sala from MusicaSala A
             INNER JOIN Sala B on A.id_sala = B.id_sala
             where :dataatual < B.data_criacao + ordem_sala
@@ -84,7 +80,6 @@
                 "sala" => $result["sala"],
                 "tempo_restante" => $result["tempo_restante"],
                 "sala_finalizada" => $this->statusSala($conn),
-                "genero" => $result["genero"],
                 "participantes" => $this->getParticipantes($conn),
                 "musicas" => $this->getMusicas($conn)
             ];
