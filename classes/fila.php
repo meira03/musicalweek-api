@@ -11,8 +11,8 @@
         public function insere($conn) {
 
             $insert = $conn->prepare(
-            "INSERT INTO [dbo].[MusicaSala] (id_usuario, id_musica, data_adicao_musica, usuario_status) 
-            VALUES (:usuario, :musica, :dataadicao, 0)"
+            "INSERT INTO [dbo].[MusicaSala] (id_usuario, id_musica, data_adicao_musica, id_genero, usuario_status) 
+            VALUES (:usuario, :musica, :dataadicao, 605, 0)"
             );
 
             $insert->bindParam(':usuario', $this->idUsuario);
