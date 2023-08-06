@@ -176,6 +176,72 @@
       return true;
     }
     
+    public function selectEmail($conn, $idUsuario) {
+      $query = "SELECT email FROM [dbo].[Usuario] WHERE id_usuario = :id";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->execute();
+
+      if ($stmt->rowCount() == 0) {
+        return false;
+      }
+
+      $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+      $this->email = $row['email'];
+
+      return true;
+    }
+
+    public function insertCodigo($conn, $idUsuario, $codigo) {
+      
+      $query = "DELETE FROM Confirmacao WHERE id_usuario = :id";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->execute();
+
+      $query = "INSERT INTO Confirmacao (id_usuario, codigo) VALUES (:id, :codigo)";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->bindParam(':codigo', $codigo);
+      $stmt->execute();
+
+      return true;
+    }
+
+    public function confirmaCodigo($conn, $idUsuario, $codigo) {
+      
+      $query = "SELECT * FROM Confirmacao WHERE id_usuario = :id";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->execute();
+
+      $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+      if ($row['tentativas'] > 4) {
+        return $row['tentativas'];
+      }
+
+      if ($row['codigo'] == $codigo) {
+        
+        // alterar usuario para confirmado
+
+        $query = "DELETE FROM Confirmacao WHERE id_usuario = :id";
+        $stmt = $conn->prepare($query);
+        $stmt->bindParam(':id', $idUsuario);
+        $stmt->execute();
+
+        return 0;
+      } else {
+        $query = "UPDATE Confirmacao SET tentativas = tentativas + 1 WHERE id_usuario = :id";
+        $stmt = $conn->prepare($query);
+        $stmt->bindParam(':id', $idUsuario);
+        $stmt->execute();
+
+        return $row['tentativas'] + 1;
+      }
+    }
+
     public function getNome() {
         return $this->nome;
     }

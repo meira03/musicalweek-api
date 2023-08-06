@@ -1,6 +1,7 @@
 <?php
 
-    header('Access-Control-Allow-Origin: https://musicalweek.vercel.app');
+    // header('Access-Control-Allow-Origin: https://musicalweek.vercel.app');
+    header('Access-Control-Allow-Origin: https://localhost:3000');
     header('Access-Control-Allow-Headers: Content-Type, Authorization');
     header('Access-Control-Allow-Credentials: true');
     header('Access-Control-Allow-Methods: POST');
@@ -31,7 +32,7 @@
 
     include("../db/dbconexao.php");
     include("../classes/usuario.php");
-    // include("../token/token.php");
+    include("../token/token.php");
 
     use Firebase\JWT\JWT;
     header('Access-Control-Allow-Origin: *');
@@ -40,9 +41,9 @@
 
     try {
         if($usuario->login($conn)){
-            echo json_encode(array('id_usuario' => $usuario->getid($conn)));
+            // echo json_encode(array('id_usuario' => $usuario->getid($conn)));
             http_response_code(200);
-            // echo json_encode(array('token' => gerarToken($usuario->getEmail())));
+            echo json_encode(array('token' => gerarToken($usuario->getid($conn))));
         } else {
             http_response_code(401);
             echo json_encode(array('login'=> false));
