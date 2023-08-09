@@ -242,6 +242,31 @@
       }
     }
 
+    public function getPlano($conn, $idUsuario) {
+      $query = "SELECT tipo_plano FROM [dbo].[Usuario] WHERE id_usuario = :id";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->execute();
+
+      if ($stmt->rowCount() == 0) {
+        return false;
+      }
+
+      $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+      return $row['tipo_plano'];
+    }
+
+    public function getEmailCensurado() {
+      $email = $this->email;
+
+      list($nome, $dominio) = explode('@', $email);
+      $letra = substr($nome, 0, 1);
+      $censurado = $letra . str_repeat('*', strlen($nome) - 1);
+      
+      return $censurado . '@' . $dominio;
+    }
+
     public function getNome() {
         return $this->nome;
     }
