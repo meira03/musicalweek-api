@@ -42,9 +42,9 @@
 
     try {
         if($usuario->login($conn)){
-            echo json_encode(array('id_usuario' => $usuario->getid($conn)));
+            //echo json_encode(array('id_usuario' => $usuario->getid($conn)));
             http_response_code(200);
-            // echo json_encode(array('token' => gerarToken($usuario->getid($conn))));
+            echo json_encode(array('token' => gerarToken($usuario->getid($conn))));
         } else {
             http_response_code(401);
             echo json_encode(array('login'=> false));

@@ -1,3 +1,0 @@
-[submodule "vendor/firebase/php-jwt"]
-	path = vendor/firebase/php-jwt
-	url = https://github.com/firebase/php-jwt
