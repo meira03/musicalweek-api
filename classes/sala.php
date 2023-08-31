@@ -228,5 +228,27 @@
                 return $resposta;
             }
         }
+
+        public function selectIdMusicaSala($conn, $sala, $idUsuario) {
+            $stmt = $conn->prepare(
+                "Select id_musicasala from MusicaSala where id_usuario = :usuario and id_sala = :sala");
+            $stmt->bindParam(':usuario', $idUsuario);
+            $stmt->bindParam(':sala', $sala);
+
+            $stmt->execute();
+
+            $resposta = $stmt->fetchColumn();
+
+            if ($resposta == null) {
+                return false;
+            } else {
+                $this->idMusicaSala = $resposta;
+                return true;
+            }
+        }
+
+        public function getIdMusicaSala() {
+            return $this->idMusicaSala;
+        }
     } 
 ?>

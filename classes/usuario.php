@@ -209,6 +209,22 @@
       return true;
     }
 
+    public function verificacaoEmail($conn, $idUsuario) {
+      
+      $query = "SELECT status FROM Usuario WHERE id_usuario = :id";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->execute();
+
+      $status = $stmt->fetchColumn();
+
+      if ($status == 1) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
     public function confirmaCodigo($conn, $idUsuario, $codigo) {
       
       $query = "SELECT * FROM Confirmacao WHERE id_usuario = :id";
@@ -223,8 +239,11 @@
       }
 
       if ($row['codigo'] == $codigo) {
-        
-        // alterar usuario para confirmado
+
+        $query = "UPDATE Usuario SET status = 1 WHERE id_usuario = :id";
+        $stmt = $conn->prepare($query);
+        $stmt->bindParam(':id', $idUsuario);
+        $stmt->execute();
 
         $query = "DELETE FROM Confirmacao WHERE id_usuario = :id";
         $stmt = $conn->prepare($query);
@@ -240,6 +259,77 @@
 
         return $row['tentativas'] + 1;
       }
+    }
+
+    public function insertCodigoSenha($conn, $idUsuario, $codigo) {
+      
+      $query = "DELETE FROM Recuperacao WHERE id_usuario = :id";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->execute();
+
+      $tempo = date('Y-m-d H:i:s');
+
+      $query = "INSERT INTO Recuperacao (id_usuario, codigo, tempo) VALUES (:id, :codigo, :tempo)";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->bindParam(':codigo', $codigo);
+      $stmt->bindParam(':tempo', $tempo);
+      $stmt->execute();
+
+      return true;
+    }
+
+    public function verificaCodigoSenha($conn, $codigo) {
+      
+      $query = "SELECT * FROM Recuperacao WHERE codigo = :codigo";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':codigo', $codigo);
+      $stmt->execute();
+
+      $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+      if ($row == null) {
+        return 0;
+      }
+
+      $tempoLimite = new DateTime($row['tempo']);
+      $tempoAtual = new DateTime();
+
+      $tempoLimite->add(new DateInterval('P1D')); 
+
+      if ($tempoLimite < $tempoAtual) {
+        $query = "DELETE FROM Recuperacao WHERE codigo = :codigo";
+        $stmt = $conn->prepare($query);
+        $stmt->bindParam(':codigo', $codigo);
+        $stmt->execute();
+
+        return -1;
+      } else {
+        return 1;
+      } 
+    }
+
+    public function trocaSenha($conn, $codigo, $senha) {
+      $senha = password_hash($senha, PASSWORD_DEFAULT);
+
+      $query = "SELECT id_usuario FROM Recuperacao WHERE codigo = :codigo";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':codigo', $codigo);
+      $stmt->execute();
+
+      $idUsuario = $stmt->fetchColumn();
+
+      $query = "UPDATE Usuario SET senha = :senha WHERE id_usuario = :id";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->bindParam(':senha', $senha);
+      $stmt->execute();
+
+      $query = "DELETE FROM Recuperacao WHERE id_usuario = :id";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->execute();
     }
 
     public function getPlano($conn, $idUsuario) {

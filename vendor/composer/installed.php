@@ -3,7 +3,7 @@
         'name' => 'davi/try',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '75aa2b2f35041d787013df0e423c2117474d09e1',
+        'reference' => '820e3d8d24897a4eb90b577d76b2d91a31827a46',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'davi/try' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '75aa2b2f35041d787013df0e423c2117474d09e1',
+            'reference' => '820e3d8d24897a4eb90b577d76b2d91a31827a46',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

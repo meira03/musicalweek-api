@@ -51,7 +51,7 @@
   if(!($cadastro->validarNick()))  $erro['nick'] = false;
   if(!($cadastro->validarEmail())) $erro['email'] = false;
   if(!($cadastro->validarData()))  $erro['data_nasc'] = false;
-  //if(!($cadastro->validarSenha())) $erro['senha'] = false;
+  if(!($cadastro->validarSenha())) $erro['senha'] = false;
 
   if($erro!= array()) {
     http_response_code(422);

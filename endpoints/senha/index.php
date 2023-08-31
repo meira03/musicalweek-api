@@ -6,13 +6,17 @@ header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Methods: POST, GET');
 header('Content-Type: application/json; charset=utf-8');
 
-// include("../../token/auth/auth.php");
+date_default_timezone_set('america/sao_paulo');
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {    
     return 0;    
 }
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    include("perfil.php");
+    include("verifica_codigo.php");
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    include("gera_codigo.php");
+} elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+    include("troca_senha.php");
 } else {
     http_response_code(405);
     echo json_encode(array('POST' => false, 'GET' => false));

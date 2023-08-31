@@ -12,50 +12,55 @@ use PHPMailer\PHPMailer\Exception;
 
 $usuario = new Usuario('','','','','');
 
-echo $idUsuario;
-//$idUsuario = 2176;
+if($usuario->verificacaoEmail($conn, $idUsuario)) {
+	http_response_code(409);
+            echo json_encode(array(
+                "verificado" => true,
+            ), JSON_UNESCAPED_UNICODE);
+	exit();
+}
 
-// $codigo = rand(1, 999999);
+$codigo = rand(1, 999999);
 
-// $usuario->insertCodigo($conn, $idUsuario, $codigo);
+$usuario->insertCodigo($conn, $idUsuario, $codigo);
 
-// $usuario->selectEmail($conn, $idUsuario);
+$usuario->selectEmail($conn, $idUsuario);
 
-// try {
-//     $mail = new PHPMailer(true);
+try {
+    $mail = new PHPMailer(true);
 
-// 	//$mail->SMTPDebug = SMTP::DEBUG_SERVER;
-// 	$mail->isSMTP();
-// 	$mail->Host = 'smtp.gmail.com';
-// 	$mail->SMTPAuth = true;
-// 	$mail->Username = 'cadastromusicalweek@gmail.com';
-// 	$mail->Password = 'icpjikwlsdzmiudj';
-// 	$mail->Port = 587;
+	//$mail->SMTPDebug = SMTP::DEBUG_SERVER;
+	$mail->isSMTP();
+	$mail->Host = 'smtp.gmail.com';
+	$mail->SMTPAuth = true;
+	$mail->Username = 'cadastromusicalweek@gmail.com';
+	$mail->Password = 'icpjikwlsdzmiudj';
+	$mail->Port = 587;
 
-// 	$mail->setFrom('cadastromusicalweek@gmail.com');
-// 	$mail->addAddress($usuario->getEmail());
+	$mail->setFrom('cadastromusicalweek@gmail.com');
+	$mail->addAddress($usuario->getEmail());
 
-// 	$mail->isHTML(true);
-// 	$mail->Subject = 'Confirme o seu Email'; 
-// 	$mail->Body = 'Seu código de confirmação de email é: <strong> ' . $codigo . '<strong>';
-// 	$mail->AltBody = 'Seu código de confirmação de email é: ' . $codigo;
+	$mail->isHTML(true);
+	$mail->Subject = 'Confirme o seu Email'; 
+	$mail->Body = 'Seu código de confirmação de email é: <strong> ' . $codigo . '<strong>';
+	$mail->AltBody = 'Seu código de confirmação de email é: ' . $codigo;
 
-// 	if($mail->send()) {
-//         http_response_code(200);
-//             echo json_encode(array(
-//                 "sucesso" => true,
-//             ), JSON_UNESCAPED_UNICODE);
-// 	} else {
-//         http_response_code(500);
-//         echo json_encode(array(
-//             "erro" => 'Email não enviado',
-//         ), JSON_UNESCAPED_UNICODE);
-// 	}
-// } catch (Exception $e) {
-// 	http_response_code(500);
-//         echo json_encode(array(
-//             "erro" => $mail->ErrorInfo,
-//         ), JSON_UNESCAPED_UNICODE);
-//     exit();
-// }
-// ?>
+	if($mail->send()) {
+        http_response_code(200);
+            echo json_encode(array(
+                "sucesso" => true,
+            ), JSON_UNESCAPED_UNICODE);
+	} else {
+        http_response_code(500);
+        echo json_encode(array(
+            "erro" => 'Email não enviado',
+        ), JSON_UNESCAPED_UNICODE);
+	}
+} catch (Exception $e) {
+	http_response_code(500);
+        echo json_encode(array(
+            "erro" => $mail->ErrorInfo,
+        ), JSON_UNESCAPED_UNICODE);
+    exit();
+}
+?>
