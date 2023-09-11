@@ -1,48 +1,36 @@
 <?php
 
-  // header('Access-Control-Allow-Origin: https://musicalweek.vercel.app');
-  header('Access-Control-Allow-Origin: http://localhost:3000');
-  // header('Access-Control-Allow-Origin: https://localhost:3000');
-  header('Access-Control-Allow-Headers: Content-Type, Authorization');
-  header('Access-Control-Allow-Credentials: true');
-  header('Access-Control-Allow-Methods: POST');
-  header('Content-Type: application/json; charset=utf-8');
-  if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {    
-    return 0;    
-  }
-  if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(array('POST' => false));
-    exit();
-  }
-
-  $vars = json_decode(file_get_contents('php://input'), true);
-
   if (!isset($vars['nome']) || !isset($vars['nick']) || !isset($vars['data_nasc']) || !isset($vars['email']) || !isset($vars['senha'])) {
     $resposta = array();
+    $resposta['descricao'] = "";
     if (!isset($vars['nome'])) {
         $resposta['nome'] = null;
+        $resposta['descricao'] .= "Nome não enviado. ";
     }
     if (!isset($vars['nick'])) {
         $resposta['nick'] = null;
+        $resposta['descricao'] .= "Nick não enviado. ";
     }
     if (!isset($vars['data_nasc'])) {
         $resposta['data_nasc'] = null;
+        $resposta['descricao'] .= "Data de nascimento não enviada. ";
     }
     if (!isset($vars['email'])) {
         $resposta['email'] = null;
+        $resposta['descricao'] .= "Email não enviado. ";
     }
     if (!isset($vars['senha'])) {
         $resposta['senha'] = null;
+        $resposta['descricao'] .= "Senha não enviado. ";
     }
     http_response_code(400);
     echo json_encode($resposta);
     exit();
   }
   
-  include("../db/dbconexao.php");
-  include("../classes/usuario.php");
-  // include("../token/token.php");
+  include("../../db/dbconexao.php");
+  include("../../classes/usuario.php");
+  include("../../token/gera/token.php");
 
   $cadastro = new Usuario($vars['nome'], $vars['nick'], $vars['data_nasc'], $vars['email'], $vars['senha']);
   $erro = array();
@@ -55,6 +43,7 @@
 
   if($erro!= array()) {
     http_response_code(422);
+    $erro['descricao'] = "Variável(s) fora do formato";
     echo json_encode($erro);
     exit();
   }
@@ -64,15 +53,20 @@
 
   if($erro!= array()) {
     http_response_code(409);
+    $erro['descricao'] = "Variável(s) já está cadastrada";
     echo json_encode($erro);
     exit();
   }
   
   try {
     $cadastro->cadastra($conn);
-    // echo json_encode(array('token' => gerarToken($cadastro->getEmail())));
-    echo json_encode(array('id_usuario' => $conn->lastInsertId()));
     http_response_code(200);
+    echo json_encode(
+      array(
+        'token' => gerarToken($cadastro->getid($conn)),
+        'nick' => $cadastro->getNick()
+      )
+    );
   } catch (PDOException $ex) {
     http_response_code(500);
     echo json_encode(array(

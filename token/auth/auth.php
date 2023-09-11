@@ -21,7 +21,7 @@
     }
 
     try {
-        $decoded = JWT::decode($token, new Key('E6wK@8J#2%7zE$5C1V!3bN@6mQ#2p%8u!4L7rP!5T*5Q#n7r$!9&xU1mG@rC6#3qDvF5zNmX', 'HS256'));
+        $decoded = JWT::decode($token, new Key('E6wK@8J#2%7z0E$5C1V!3bN@6mQ#2p%8u!4L7rP!5T*5Q#n7r$!9&xU1mG@rC6#3qDvF5zNmX', 'HS256'));
         $idUsuario = $decoded->sub;
     } catch (Throwable $e) {
         http_response_code(401);

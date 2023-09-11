@@ -118,7 +118,7 @@
     public function cadastra($conn) {
       $insert = $conn->prepare(
       "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, senha, tipo_plano) 
-      VALUES (:nome, :nick, :dataNasc, :email, :senha, 1)"
+      VALUES (:nome, :nick, :dataNasc, :email, :senha, 0)"
       );
       
       $insert->bindParam(':nome', $this->nome);
@@ -191,6 +191,15 @@
       $this->email = $row['email'];
 
       return true;
+    }
+
+    public function selectNick($conn) {
+      $query = "SELECT username FROM [dbo].[Usuario] WHERE email = :email";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(":email", $this->email);
+      $stmt->execute();
+      $idUsuario = $stmt->fetchColumn();
+      return $idUsuario;
     }
 
     public function insertCodigo($conn, $idUsuario, $codigo) {
@@ -347,14 +356,129 @@
       return $row['tipo_plano'];
     }
 
-    public function getEmailCensurado() {
-      $email = $this->email;
+    private function getEmailCensurado($email) {
 
       list($nome, $dominio) = explode('@', $email);
       $letra = substr($nome, 0, 1);
       $censurado = $letra . str_repeat('*', strlen($nome) - 1);
       
       return $censurado . '@' . $dominio;
+    }
+
+    public function selectLogin($conn) {
+      $query = "SELECT id_usuario, username, tipo_plano FROM [dbo].[Usuario] WHERE email = :email";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(":email", $this->email);
+      $stmt->execute();
+      
+      return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function trocaPlano($conn, $idUsuario, $plano) {
+      $query = "UPDATE Usuario SET tipo_plano = :plano WHERE id_usuario = :idUsuario";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(":plano", $plano);
+      $stmt->bindParam(":idUsuario", $idUsuario);
+      $stmt->execute();
+      
+      return $plano;
+    }
+
+    public function verificaSenha($conn, $idUsuario, $senha) {
+      $query = "SELECT senha FROM Usuario WHERE id_usuario = :idUsuario";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(":idUsuario", $idUsuario);
+      $stmt->execute();
+      
+      return password_verify($senha, $stmt->fetchColumn());
+    }
+
+    public function novaSenha($conn, $idUsuario) {
+      $hash = password_hash($this->senha, PASSWORD_DEFAULT);
+
+      $query = "UPDATE Usuario SET senha = :novaSenha WHERE id_usuario = :idUsuario";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(":novaSenha", $hash);
+      $stmt->bindParam(":idUsuario", $idUsuario);
+
+      $stmt->execute();
+    }
+
+    public function atualiza($conn, $idUsuario, $icon) {
+      $query = "UPDATE Usuario SET nome = :nome, username = :username, icon = :icon,data_nasc = :data_nasc WHERE id_usuario = :idUsuario";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(":nome", $this->nome);
+      $stmt->bindParam(":username", $this->nick);
+      $stmt->bindParam(":icon", $icon);
+      $stmt->bindParam(":data_nasc", $this->dataNasc);
+      $stmt->bindParam(":idUsuario", $idUsuario);
+
+      $stmt->execute();
+    }
+
+    public function getUsername($conn, $idUsuario) {
+      $query = "SELECT username FROM Usuario WHERE id_usuario = :idUsuario";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(":idUsuario", $idUsuario);
+      $stmt->execute();
+
+      $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+      return $result['username'];
+    }
+
+    public function perfil($conn, $idUsuario) {
+      $query = "SELECT nome, email, username, data_nasc, tipo_plano, status, icon FROM [dbo].[Usuario] WHERE id_usuario = :id";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->execute();
+
+      $perfil = $stmt->fetch(PDO::FETCH_ASSOC);
+
+      $perfil['icon'] = str_replace(' ', '', $perfil['icon']);
+      $perfil['email'] = $this->getEmailCensurado($perfil['email']);
+      $perfil['data_nasc'] = date("d/m/Y", strtotime($perfil['data_nasc']));
+
+      $perfil['plano'] = $perfil['tipo_plano'];
+      unset($perfil['tipo_plano']);
+
+      $perfil['nick'] = $perfil['username'];
+      unset($perfil['username']); 
+      
+      if ($perfil['status'] == null) {
+        $perfil['confirmacao'] = false;
+      } else {
+        $perfil['confirmacao'] = true;
+      }
+      unset($perfil['status']);
+
+      return $perfil;
+    }
+
+    public function delete($conn, $idUsuario) {
+      $query = "DELETE FROM Usuario WHERE id_usuario = :id";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->execute();
+
+      if ($stmt->rowCount() == 0) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    public function confirmacao($conn, $idUsuario) {
+      $query = "SELECT status from Usuario where id_usuario = :id";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->execute();
+
+      if ($stmt->fetchColumn() != null) {
+        return true;
+      } else {
+        return false;
+      }
     }
 
     public function getNome() {

@@ -1,8 +1,8 @@
 <?php
 
-require_once('../confirmacao/src/PHPMailer.php');
-require_once('../confirmacao/src/SMTP.php');
-require_once('../confirmacao/src/Exception.php');
+require_once('../email/src/PHPMailer.php');
+require_once('../email/src/SMTP.php');
+require_once('../email/src/Exception.php');
 require_once("../../db/dbconexao.php");
 require_once("../../classes/usuario.php");
 
@@ -66,7 +66,7 @@ try {
 	} else {
         http_response_code(500);
         echo json_encode(array(
-            "erro" => 'Email não enviado',
+            "erro" => 'Código no email não enviado',
         ), JSON_UNESCAPED_UNICODE);
 	}
 } catch (Exception $e) {

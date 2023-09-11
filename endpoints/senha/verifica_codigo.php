@@ -32,7 +32,6 @@ try {
         http_response_code(200);
         echo json_encode(array(
             "valido" => true,
-            "descricao" => 'Código é válido',
         ), JSON_UNESCAPED_UNICODE);
     } elseif ($tentativas == -1) {
         http_response_code(401);

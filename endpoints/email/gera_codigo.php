@@ -16,6 +16,7 @@ if($usuario->verificacaoEmail($conn, $idUsuario)) {
 	http_response_code(409);
             echo json_encode(array(
                 "verificado" => true,
+				"descricao" => "Email verificado anteriormente",
             ), JSON_UNESCAPED_UNICODE);
 	exit();
 }
