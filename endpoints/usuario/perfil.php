@@ -22,7 +22,6 @@ try {
         "salas" => $salas,
         "historico" => $historico
     ), JSON_UNESCAPED_UNICODE);
-    // echo json_encode($perfil);
 } catch (PDOException $ex) {
     http_response_code(500);
     echo json_encode(array(

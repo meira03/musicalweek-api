@@ -27,7 +27,7 @@
     include("../db/dbconexao.php");
     include("../classes/sala.php");
 
-    $sala = new Sala($_GET['id_musica_sala']);
+    $sala = new Sala('');
 
     try {
         if(!$sala->verifica($conn)){
@@ -36,7 +36,7 @@
             exit();
         }
     
-        echo json_encode($sala->getInfo($conn));
+        echo json_encode($sala->getInfo($conn, $_GET['id_musica_sala']));
     } catch (PDOException $ex) {
         http_response_code(500);
         echo json_encode(array(

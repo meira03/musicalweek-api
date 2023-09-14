@@ -520,12 +520,14 @@
       $stmt->bindParam(':id', $idUsuario);
       $stmt->execute();
 
-      $salas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-      $stmt->nextRowset();
       $total = $stmt->fetchColumn();
+      
+      $stmt->nextRowset();
+
+      $salas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
       return array(
-        "total" => $total,
+        "total" => intval($total),
         "salas" => $salas
       );
     }
