@@ -1,10 +1,13 @@
 <?php
 
-header('Access-Control-Allow-Origin: https://localhost:3000');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Access-Control-Allow-Credentials: true');
-header('Access-Control-Allow-Methods: POST, GET, PUT');
-header('Content-Type: application/json; charset=utf-8');
+// header('Access-Control-Allow-Origin: https://localhost:3000');
+// header('Access-Control-Allow-Headers: Content-Type, Authorization');
+// header('Access-Control-Allow-Credentials: true');
+// header('Access-Control-Allow-Methods: POST, GET, PUT');
+// header('Content-Type: application/json; charset=utf-8');
+
+echo $_SERVER['REQUEST_METHOD'];
+die();
 
 date_default_timezone_set('america/sao_paulo');
 
