@@ -1,9 +1,81 @@
 <?php
     class Sala {
-        private $idMusicaSala;
     
-        public function __construct($idMusicaSala) {
-            $this->idMusicaSala = $idMusicaSala;
+        public function __construct() {
+        }
+
+        public function limite($conn, $idUsuario) {
+            $stmt = $conn->prepare(
+                "SELECT SUM(total_registros) AS total_geral
+                FROM (
+                    SELECT COUNT(*) AS total_registros
+                    FROM MusicaSala MS
+                    INNER JOIN Sala S ON MS.id_sala = S.id_sala
+                    WHERE MS.id_usuario = :id AND dbo.datacorreta() < DATEADD(DAY, 7, S.data_inicio)
+                
+                    UNION ALL
+                
+                    SELECT COUNT(*) AS total_registros
+                    FROM MusicaSala
+                    WHERE usuario_status = 0 AND id_usuario = :idu
+                ) AS subquery;
+                
+                SELECT tipo_plano from Usuario where id_usuario = :idus"
+            );
+
+            $stmt->bindParam(':id', $idUsuario);
+            $stmt->bindParam(':idu', $idUsuario);
+            $stmt->bindParam(':idus', $idUsuario);
+            $stmt->execute();
+
+            $total = $stmt->fetchColumn();
+
+            $stmt->nextRowset();
+
+            $plano = $stmt->fetchColumn();
+
+            if ($plano == 0 && $total > 1) {
+                return 2;
+            }
+
+            if ($plano == 1 && $total > 4) {
+                return 5;
+            }
+
+            if ($plano == 2 && $total > 29) {
+                return 30;
+            }
+
+            return 0;
+        }
+
+        public function insereFila($conn, $idUsuario, $idMusica) {
+            $insert = $conn->prepare(
+                "INSERT INTO [dbo].[MusicaSala] (id_usuario, id_musica, data_adicao_musica, usuario_status) 
+                VALUES (:usuario, :musica, dbo.datacorreta(), 0);"
+            );
+
+            $insert->bindParam(':usuario', $idUsuario);
+            $insert->bindParam(':musica', $idMusica);
+            $insert->execute();
+
+            $select = $conn->prepare(
+                "SELECT top 1 id_musicasala, id_sala from MusicaSala where id_usuario = :usuario order by id_musicasala desc"
+            );
+            $select->bindParam(':usuario', $idUsuario);
+            $select->execute();
+
+            return $select->fetch(PDO::FETCH_ASSOC);
+        }
+
+        public function saiFila($conn, $idUsuario, $idMusicaSala) {
+            $stmt = $conn->prepare("SP_SAIDAFILA :idmusicasala, :usuario");
+
+            $stmt->bindParam(':usuario', $idUsuario);
+            $stmt->bindParam(':idmusicasala', $idMusicaSala);
+            $stmt->execute();
+
+            return $stmt->fetch(PDO::FETCH_ASSOC);
         }
 
         public function buscaSalas($conn, $idUsuario) {

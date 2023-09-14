@@ -481,6 +481,55 @@
       }
     }
 
+    public function getFila($conn, $idUsuario) {
+      $query = "SELECT id_musicasala, id_musica from MusicaSala where usuario_status = 0 and id_usuario = :id";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->execute();
+
+      return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getSalas($conn, $idUsuario) {
+      $query = 
+        "SELECT
+            S.id_sala AS id_sala,
+            S.nome AS nome_sala,
+            (SELECT TOP 1 A.id_musica
+            FROM 
+                MusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
+            WHERE 
+            dbo.datacorreta() < B.data_inicio + ordem_sala AND A.id_sala = MS.id_sala
+            ORDER BY 
+                A.ordem_sala) AS id_musica
+        FROM
+            MusicaSala MS
+            INNER JOIN Sala S ON MS.id_sala = S.id_sala
+        WHERE
+            MS.id_usuario = :id and dbo.datacorreta() < DATEADD(DAY,7,S.data_inicio)";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->execute();
+
+      return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getHistorico($conn, $idUsuario) {
+      $query = "SP_RETORNAHISTORICO :id";
+      $stmt = $conn->prepare($query);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->execute();
+
+      $salas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      $stmt->nextRowset();
+      $total = $stmt->fetchColumn();
+
+      return array(
+        "total" => $total,
+        "salas" => $salas
+      );
+    }
+
     public function getNome() {
         return $this->nome;
     }
