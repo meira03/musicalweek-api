@@ -1,13 +1,10 @@
 <?php
 
-// header('Access-Control-Allow-Origin: https://localhost:3000');
-// header('Access-Control-Allow-Headers: Content-Type, Authorization');
-// header('Access-Control-Allow-Credentials: true');
-// header('Access-Control-Allow-Methods: POST, GET, PUT, DELETE');
-// header('Content-Type: application/json; charset=utf-8');
-
-echo $_SERVER['REQUEST_METHOD'];
-die();
+header('Access-Control-Allow-Origin: https://localhost:3000');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Methods: POST, GET, PUT, DELETE');
+header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {    
     return 0;    
