@@ -127,7 +127,7 @@
       $insert->bindParam(':email', $this->email);
       $insert->bindParam(':senha', $hash);
 
-      $hash = password_hash($this->senha, PASSWORD_DEFAULT);
+      $hash = hash('sha256', $this->senha);
       
       $insert->execute();
     }
@@ -140,7 +140,8 @@
         $stmt = $conn->prepare("SELECT senha FROM [dbo].[Usuario] WHERE email = :email");
         $stmt->bindParam(":email", $this->email);
         $stmt->execute();
-        if (password_verify($this->senha, $stmt->fetchColumn())) {
+
+        if (hash_equals($stmt->fetchColumn(), hash('sha256', $this->senha))) {
           return true;
         }
       }
@@ -320,7 +321,7 @@
     }
 
     public function trocaSenha($conn, $codigo, $senha) {
-      $senha = password_hash($senha, PASSWORD_DEFAULT);
+      $senha = hash('sha256', $senha);
 
       $query = "SELECT id_usuario FROM Recuperacao WHERE codigo = :codigo";
       $stmt = $conn->prepare($query);
@@ -390,11 +391,11 @@
       $stmt->bindParam(":idUsuario", $idUsuario);
       $stmt->execute();
       
-      return password_verify($senha, $stmt->fetchColumn());
+      return hash('sha256', $senha) == $stmt->fetchColumn();
     }
 
     public function novaSenha($conn, $idUsuario) {
-      $hash = password_hash($this->senha, PASSWORD_DEFAULT);
+      $hash = hash('sha256', $this->senha);
 
       $query = "UPDATE Usuario SET senha = :novaSenha WHERE id_usuario = :idUsuario";
       $stmt = $conn->prepare($query);
