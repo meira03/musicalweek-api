@@ -140,12 +140,15 @@
         $stmt = $conn->prepare("SELECT senha FROM [dbo].[Usuario] WHERE email = :email");
         $stmt->bindParam(":email", $this->email);
         $stmt->execute();
-
+        
         if (hash_equals($stmt->fetchColumn(), hash('sha256', $this->senha))) {
-          return true;
+          return 1;
+        } else {
+          return 0;
         }
+      } else {
+        return 2;
       }
-      return false;
     }
 
     public function getid($conn) {

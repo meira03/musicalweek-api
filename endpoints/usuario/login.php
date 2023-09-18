@@ -25,7 +25,9 @@
     $usuario = new Usuario('','','',$vars['email'],$vars['senha']);
 
     try {
-        if($usuario->login($conn)){
+        $codigo = $usuario->login($conn);
+
+        if ($codigo == 1) {
             $select = $usuario->selectLogin($conn);
             http_response_code(200);
             echo json_encode(
@@ -35,9 +37,26 @@
                     'plano' => $select['tipo_plano']
                 )
             );
+            exit();
+        }  elseif ($codigo == 2) {
+            $select = $usuario->selectLogin($conn);
+            http_response_code(404);
+            echo json_encode(
+                array(
+                    'login'=> false,
+                    'email' => false,
+                    'descricao' => "Email não cadastrado"
+                )
+            );
         } else {
             http_response_code(401);
-            echo json_encode(array('login'=> false));
+            echo json_encode(
+                array(
+                    'login'=> false,
+                    'senha' => false,
+                    'descricao' => "Senha incorreta"
+                )
+            );
             exit();
         }
     } catch (PDOException $ex) {
