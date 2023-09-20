@@ -32,13 +32,13 @@ try {
     if($insert['id_sala'] != null){
         http_response_code(201);
         echo json_encode(array(
-            "id_sala" => intval($insert['id_sala'])
+            "id_sala" => $insert['id_sala']
         ), JSON_UNESCAPED_UNICODE);
         exit();
     } else {
         http_response_code(200);
         echo json_encode(array(
-            "id_musica_sala" => intval($insert['id_musicasala'])
+            "id_musica_sala" => $insert['id_musicasala']
         ), JSON_UNESCAPED_UNICODE);
         exit();
     }

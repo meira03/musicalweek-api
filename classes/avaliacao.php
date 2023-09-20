@@ -3,13 +3,21 @@
         private $idUsuario;
         private $idSala;
         private $nota;
-        private $data;
     
         public function __construct($idUsuario, $idSala, $nota) {
             $this->idUsuario = $idUsuario;
             $this->idSala = $idSala;
             $this->nota = $nota;
-            $this->data = date("Y-m-d H:i:s");
+        }
+
+        public function insere ($conn) {
+            $insert =  $conn->prepare("SP_INSERE_NOTA :usuario, :musicasala, :nota");
+            $insert->bindParam(":usuario", $this->idUsuario);
+            $insert->bindParam(":musicasala", $this->idSala);
+            $insert->bindParam(":nota", $this->nota);
+            $insert->execute();
+
+            return $insert->fetchColumn();
         }
 
         public function validaUsuarioSala($conn) {

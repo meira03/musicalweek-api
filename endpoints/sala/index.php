@@ -12,7 +12,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     return 0;    
 }
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    //include("sala.php");
+    if(isset($_GET['id_musica_sala'])) {
+        include("get_fila.php");
+    } else {
+        include("get_sala.php");
+    }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     include("entra_fila.php");
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
