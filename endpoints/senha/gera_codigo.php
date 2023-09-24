@@ -55,8 +55,8 @@ try {
 
 	$mail->isHTML(true);
 	$mail->Subject = 'Troque sua senha'; 
-	$mail->Body = 'Seu código de recuperação de senha é: <strong> ' . $codigo . '<strong>';
-	$mail->AltBody = 'Seu código de recuperação de senha é: ' . $codigo;
+	$mail->Body = 'Clique para trocar senha <a href="http://localhost:3000/pt/esqueci-senha/' . $codigo . '"> Trocar Senha </a>';
+	$mail->AltBody = 'Clique no link para trocar senha: http://localhost:3000/pt/esqueci-senha/' . $codigo;
 
 	if($mail->send()) {
         http_response_code(200);
