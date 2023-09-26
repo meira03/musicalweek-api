@@ -54,9 +54,11 @@
         $codigo = $avaliacao->insere($conn);
 
         if ($codigo == 1) {
+            $avaliacaoMedia = $avaliacao->avaliacaoMedia($conn);
             http_response_code(200);
             echo json_encode(array(
                 "sucesso" => true,
+                "avaliacao_media" => $avaliacaoMedia
             ), JSON_UNESCAPED_UNICODE);
         } elseif ($codigo == 2) {
             http_response_code(403);

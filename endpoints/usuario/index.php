@@ -25,7 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $vars = json_decode(file_get_contents('php://input'), true);
-    if (!isset($vars['nome']) && !isset($vars['nick']) && !isset($vars['data_nasc'])) {
+    if (isset($vars['token_google'])) {
+        include("login_google.php");
+    } elseif (isset($vars['token_spotify'])) {
+        include("login_spotify.php");
+    } elseif (!isset($vars['nome']) && !isset($vars['nick']) && !isset($vars['data_nasc'])) {
         include("login.php");
     } else {
         include("cadastro.php");
