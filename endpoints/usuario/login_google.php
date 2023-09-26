@@ -35,5 +35,36 @@
         exit();
     }
 
+    include("../../db/dbconexao.php");
+    include("../../classes/usuario.php");
+
+    $usuario = new Usuario('','','',$resposta['email'],'');
+
+    $id = $usuario->getid($conn);
+
+    if ($id == null) {
+        http_response_code(404);
+        echo json_encode(
+            array(
+                'cadastro' => false,
+                'descricao' => "Email não cadastrado"
+            )
+        );
+        exit();
+    }
+
+    include("../../token/gera/token.php");
+
+    $select = $usuario->selectLogin($conn);
+    http_response_code(200);
+    echo json_encode(
+        array(
+            'token' => gerarToken($select['id_usuario']),
+            'nick' => $select['username'],
+            'plano' => $select['tipo_plano']
+        )
+    );
+    exit();
+
     echo json_encode(array("email" => $resposta['email']));
 ?>

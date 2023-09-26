@@ -26,7 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $vars = json_decode(file_get_contents('php://input'), true);
     if (isset($vars['token_google'])) {
-        include("login_google.php");
+        if (isset($vars['data_nasc']) || isset($vars['nick'])) {
+            include("cadastro_google.php");
+        } else {
+            include("login_google.php");
+        }
     } elseif (isset($vars['token_spotify'])) {
         include("login_spotify.php");
     } elseif (!isset($vars['nome']) && !isset($vars['nick']) && !isset($vars['data_nasc'])) {

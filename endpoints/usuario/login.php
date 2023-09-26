@@ -48,6 +48,7 @@
                     'descricao' => "Email não cadastrado"
                 )
             );
+            exit();
         } else {
             http_response_code(401);
             echo json_encode(
