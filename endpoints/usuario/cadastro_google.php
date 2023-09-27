@@ -44,8 +44,6 @@
         ), JSON_UNESCAPED_UNICODE);
         exit();
     }
-    
-    echo "cadastro description"; exit();
 
     if (!isset($resposta['email']) || !isset($resposta['name'])) {
         http_response_code(500);
