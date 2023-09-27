@@ -7,6 +7,8 @@
 
     $resposta = curl_exec($ch);
 
+    echo "login fetch"; exit();
+
     if ($resposta === false) {
         http_response_code(500);
         echo json_encode(array(
@@ -35,8 +37,6 @@
         exit();
     }
 
-    echo "login"; exit();
-    
     include("../../db/dbconexao.php");
     include("../../classes/usuario.php");
 
@@ -67,6 +67,4 @@
         )
     );
     exit();
-
-    echo json_encode(array("email" => $resposta['email']));
 ?>

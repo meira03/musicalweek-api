@@ -25,6 +25,8 @@
 
     $resposta = curl_exec($ch);
 
+    echo "cadastro fetch"; exit();
+
     if ($resposta === false) {
         http_response_code(500);
         echo json_encode(array(
@@ -53,8 +55,6 @@
         exit();
     }
 
-    echo "cadastro"; exit();
-    
     include("../../db/dbconexao.php");
     include("../../classes/usuario.php");
     include("../../token/gera/token.php");
