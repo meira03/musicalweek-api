@@ -33,14 +33,13 @@
     }
 
     public function validarData() {
-      $formato = 'Y-m-d'; 
+      $dateObj = DateTime::createFromFormat('Y-m-d', $this->dataNasc);
 
-      
-      $dateObj = DateTime::createFromFormat($formato, $this->dataNasc);
-  
-      
-      if ($dateObj && $dateObj->format($formato) === $this->dataNasc) {
-        return true;
+      if ($dateObj) {
+        $hoje = new DateTime();
+        $diferenca = $hoje->diff($dateObj);
+
+        return $diferenca->y >= 18;
       } else {
         return false;
       }
