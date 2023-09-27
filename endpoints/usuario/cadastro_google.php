@@ -37,6 +37,8 @@
 
     $resposta = json_decode($resposta, true);
 
+    echo "";
+
     if (isset($resposta['error_description'])) {
         http_response_code(500);
         echo json_encode(array(

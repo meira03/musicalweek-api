@@ -19,7 +19,7 @@
 
     $resposta = json_decode($resposta, true);
 
-    echo "login json_decode";
+    echo "";
 
     if (isset($resposta['error_description'])) {
         http_response_code(500);
@@ -29,8 +29,6 @@
         exit();
     }
 
-    echo "login description";
-
     if (!isset($resposta['email'])) {
         http_response_code(500);
         echo json_encode(array(
@@ -38,8 +36,6 @@
         ), JSON_UNESCAPED_UNICODE);
         exit();
     }
-
-    echo "login email";
 
     include("../../db/dbconexao.php");
     include("../../classes/usuario.php");
