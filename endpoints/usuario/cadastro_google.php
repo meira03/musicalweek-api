@@ -1,7 +1,5 @@
 <?php
 
-    echo "cadastro"; exit();
-
     if(!isset($vars['nick'])) {
         http_response_code(400);
         echo json_encode(array(
@@ -55,6 +53,8 @@
         exit();
     }
 
+    echo "cadastro"; exit();
+    
     include("../../db/dbconexao.php");
     include("../../classes/usuario.php");
     include("../../token/gera/token.php");
