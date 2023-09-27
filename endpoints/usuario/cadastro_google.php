@@ -45,8 +45,6 @@
         exit();
     }
 
-    echo "cadastro description";
-
     if (!isset($resposta['email']) || !isset($resposta['name'])) {
         http_response_code(500);
         echo json_encode(array(
@@ -54,8 +52,6 @@
         ), JSON_UNESCAPED_UNICODE);
         exit();
     }
-    
-    echo "cadastro email";
 
     include("../../db/dbconexao.php");
     include("../../classes/usuario.php");
