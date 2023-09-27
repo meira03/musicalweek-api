@@ -1,5 +1,7 @@
 <?php
 
+    echo "login"; exit();
+
     $ch = curl_init('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=' . urlencode($vars['token_google']));
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

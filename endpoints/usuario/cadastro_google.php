@@ -1,5 +1,7 @@
 <?php
 
+    echo "cadastro"; exit();
+
     if(!isset($vars['nick'])) {
         http_response_code(400);
         echo json_encode(array(

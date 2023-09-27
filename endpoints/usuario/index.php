@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         if (isset($vars['data_nasc']) || isset($vars['nick'])) {
             include("cadastro_google.php");
         } else {
-            //include("login_google.php");
+            include("login_google.php");
         }
     } elseif (isset($vars['token_spotify'])) {
         include("login_spotify.php");
