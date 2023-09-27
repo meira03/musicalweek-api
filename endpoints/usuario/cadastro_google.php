@@ -37,8 +37,6 @@
 
     $resposta = json_decode($resposta, true);
 
-    echo "cadastro decode"; exit();
-
     if (isset($resposta['error_description'])) {
         http_response_code(500);
         echo json_encode(array(
@@ -46,6 +44,8 @@
         ), JSON_UNESCAPED_UNICODE);
         exit();
     }
+    
+    echo "cadastro description"; exit();
 
     if (!isset($resposta['email']) || !isset($resposta['name'])) {
         http_response_code(500);

@@ -19,8 +19,6 @@
 
     $resposta = json_decode($resposta, true);
 
-    echo "login decode"; exit();
-
     if (isset($resposta['error_description'])) {
         http_response_code(500);
         echo json_encode(array(
@@ -28,6 +26,8 @@
         ), JSON_UNESCAPED_UNICODE);
         exit();
     }
+
+    echo "login description"; exit();
 
     if (!isset($resposta['email'])) {
         http_response_code(500);
