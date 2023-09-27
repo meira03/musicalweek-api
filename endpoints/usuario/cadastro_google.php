@@ -18,53 +18,49 @@
         exit();
     }
 
-    $ch = curl_init('https://www.googleapis.com/oauth2/v2/userinfo?access_token=' . urlencode($vars['token_google']));
+    // $ch = curl_init('https://www.googleapis.com/oauth2/v2/userinfo?access_token=' . urlencode($vars['token_google']));
 
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-    $resposta = curl_exec($ch);
+    // $resposta = curl_exec($ch);
 
-    if ($resposta === false) {
-        http_response_code(500);
-        echo json_encode(array(
-            "erro" => 'Erro na requisição do Google: '. curl_error($ch)
-        ), JSON_UNESCAPED_UNICODE);
-        exit();
-    }
+    // if ($resposta === false) {
+    //     http_response_code(500);
+    //     echo json_encode(array(
+    //         "erro" => 'Erro na requisição do Google: '. curl_error($ch)
+    //     ), JSON_UNESCAPED_UNICODE);
+    //     exit();
+    // }
 
-    curl_close($ch);
+    // curl_close($ch);
 
-    $resposta = json_decode($resposta, true);
+    // $resposta = json_decode($resposta, true);
 
-    if (isset($resposta['error_description'])) {
-        http_response_code(500);
-        echo json_encode(array(
-            "erro" => 'Erro do Google: ' . $resposta['error_description']
-        ), JSON_UNESCAPED_UNICODE);
-        exit();
-    }
+    // if (isset($resposta['error_description'])) {
+    //     http_response_code(500);
+    //     echo json_encode(array(
+    //         "erro" => 'Erro do Google: ' . $resposta['error_description']
+    //     ), JSON_UNESCAPED_UNICODE);
+    //     exit();
+    // }
 
-    if (!isset($resposta['email']) || !isset($resposta['name'])) {
-        http_response_code(500);
-        echo json_encode(array(
-            "erro" => 'Erro na requisição do Google'
-        ), JSON_UNESCAPED_UNICODE);
-        exit();
-    }
-
-    $caracteres = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+[]{}|;:,.<>?';
-    $senha = '';
-    
-    for ($i = 0; $i < 64; $i++) {
-        $senha .= $caracteres[rand(0, strlen($caracteres) - 1)];
-    }
+    // if (!isset($resposta['email']) || !isset($resposta['name'])) {
+    //     http_response_code(500);
+    //     echo json_encode(array(
+    //         "erro" => 'Erro na requisição do Google'
+    //     ), JSON_UNESCAPED_UNICODE);
+    //     exit();
+    // }
 
     include("../../db/dbconexao.php");
     include("../../classes/usuario.php");
     include("../../token/gera/token.php");
 
-    $cadastro = new Usuario($resposta['name'], $vars['nick'], $vars['data_nasc'], $resposta['email'], $senha);
+    $resposta['name'] = "google";
+    $resposta['email'] = "google";
+
+    $cadastro = new Usuario($resposta['name'], $vars['nick'], $vars['data_nasc'], $resposta['email'], '');
     $erro = array();
 
     if(!($cadastro->validarNome()))  $erro['nome'] = false;
@@ -89,11 +85,11 @@
     }
 
     try {
-        $cadastro->cadastra($conn);
+        $cadastro->cadastraGoogle($conn);
         http_response_code(200);
         echo json_encode(
           array(
-            'token' => gerarToken($cadastro->getid($conn)),
+            'token' => gerarToken($conn->lastInsertId()),
             'nick' => $cadastro->getNick()
           )
         );

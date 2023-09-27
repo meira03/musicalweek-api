@@ -63,7 +63,7 @@
     http_response_code(200);
     echo json_encode(
       array(
-        'token' => gerarToken($cadastro->getid($conn)),
+        'token' => gerarToken($conn->lastInsertId()),
         'nick' => $cadastro->getNick()
       )
     );

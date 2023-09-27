@@ -16,7 +16,7 @@
     }
 
     public function validarNome() {
-      if (mb_strlen($this->nome) < 257) {
+      if (mb_strlen($this->nome) < 257 && $this->nome != null) {
         return true; 
       } else {
         return false; 
@@ -129,6 +129,20 @@
       $hash = hash('sha256', $this->senha);
       
       $insert->execute();
+    } 
+
+    public function cadastraGoogle($conn) {
+      $insert = $conn->prepare(
+      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, tipo_plano, status) 
+      VALUES (:nome, :nick, :dataNasc, :email, 0, 1)"
+      );
+      
+      $insert->bindParam(':nome', $this->nome);
+      $insert->bindParam(':nick', $this->nick);
+      $insert->bindParam(':dataNasc', $this->dataNasc);
+      $insert->bindParam(':email', $this->email);
+      
+      $insert->execute();
     }
 
     public function login($conn) {
@@ -139,8 +153,12 @@
         $stmt = $conn->prepare("SELECT senha FROM [dbo].[Usuario] WHERE email = :email");
         $stmt->bindParam(":email", $this->email);
         $stmt->execute();
+
+        $senha = $stmt->fetchColumn();
         
-        if (hash_equals($stmt->fetchColumn(), hash('sha256', $this->senha))) {
+        if($senha == null) return false;
+        
+        if (hash_equals($senha, hash('sha256', $this->senha))) {
           return 1;
         } else {
           return 0;
