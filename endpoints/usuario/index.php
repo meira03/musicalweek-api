@@ -27,9 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $vars = json_decode(file_get_contents('php://input'), true);
     if (isset($vars['token_google'])) {
         if (isset($vars['data_nasc']) || isset($vars['nick'])) {
-            //include("cadastro_google.php");
+            include("cadastro_google.php");
         } else {
-            include("login_google.php");
+            //include("login_google.php");
         }
     } elseif (isset($vars['token_spotify'])) {
         include("login_spotify.php");
