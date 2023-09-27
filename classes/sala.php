@@ -190,7 +190,7 @@
             foreach ($idsMusicaSala as $row) {
                 $musicaId = $row['id_musicasala'];
                 $stmt = $conn->prepare(
-                    "SELECT A.id_musica, A.nota_calculada, A.ordem_sala, B.nota from MusicaSala A
+                    "SELECT A.id_musica, A.nota_calculada, B.nota from MusicaSala A
                     LEFT JOIN Avaliacao B ON A.id_musicasala = B.id_musicasala 
                     AND B.id_usuario = :usuario
                     where A.id_musicasala = :musicaid");
@@ -204,7 +204,6 @@
                 array_push($musicas, [
                     "id_musica_sala" => $musicaId,
                     "musica" => $result["id_musica"],
-                    "ordem" => $result["ordem_sala"],
                     "avaliacao_media" =>  $result["nota_calculada"],
                     "nota_usuario" => $result["nota"],
                     "avaliacoes" => $this->getAvaliacoes($conn, $musicaId, $idSala)
