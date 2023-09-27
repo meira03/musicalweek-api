@@ -53,8 +53,6 @@
         exit();
     }
 
-    $resposta['email'] = "testetestee@gmail.com";
-    $resposta['name'] = "testeteste@gmail.com";
     $caracteres = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+[]{}|;:,.<>?';
     $senha = '';
     
