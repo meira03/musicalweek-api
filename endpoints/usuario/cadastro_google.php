@@ -25,8 +25,6 @@
 
     $resposta = curl_exec($ch);
 
-    echo "cadastro fetch"; exit();
-
     if ($resposta === false) {
         http_response_code(500);
         echo json_encode(array(
@@ -38,6 +36,8 @@
     curl_close($ch);
 
     $resposta = json_decode($resposta, true);
+
+    echo "cadastro decode"; exit();
 
     if (isset($resposta['error_description'])) {
         http_response_code(500);
