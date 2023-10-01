@@ -528,8 +528,8 @@
     public function getSalas($conn, $idUsuario) {
       $query = 
         "SELECT
-            S.id_sala AS id_sala,
-            S.nome AS nome_sala,
+            S.id_sala,
+            S.nome,
             (SELECT TOP 1 A.id_musica
             FROM 
                 MusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
