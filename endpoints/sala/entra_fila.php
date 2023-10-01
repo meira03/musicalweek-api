@@ -16,16 +16,16 @@ include("../../classes/sala.php");
 $fila = new sala('');
 
 try {
-    // $limite = $fila->limite($conn, $idUsuario);
+    $limite = $fila->limite($conn, $idUsuario);
 
-    // if ($limite != 0) {
-    //     http_response_code(401);
-    //     echo json_encode(array(
-    //         "limite" => $limite,
-    //         "descricao" => "Limite de salas atingido",
-    //     ), JSON_UNESCAPED_UNICODE);
-    //     exit();
-    // }
+    if ($limite != 0) {
+        http_response_code(401);
+        echo json_encode(array(
+            "limite" => $limite,
+            "descricao" => "Limite de salas atingido",
+        ), JSON_UNESCAPED_UNICODE);
+        exit();
+    }
 
     $insert = $fila->insereFila($conn, $idUsuario, $vars['id_musica']);
 
