@@ -1,8 +1,6 @@
 <?php 
 
-$vars = json_decode(file_get_contents('php://input'), true);
-
-if(!isset($vars['id_musica_sala'])) {
+if(!isset($_GET['id_musica_sala'])) {
     $response = array();
     $response['id_musica_sala'] = null;
     $response['descricao'] = "Id da musica sala não enviado";
@@ -10,10 +8,10 @@ if(!isset($vars['id_musica_sala'])) {
     exit();
 }
 
-if(!is_int($vars['id_musica_sala'])) {
+if(!is_int($_GET['id_musica_sala'])) {
     $response = array();
     $response['id_musica_sala'] = false;
-    $response['descricao'] = "Id da musica sala deve ser é inteiro, e não " . gettype($vars['id_musica_sala']);
+    $response['descricao'] = "Id da musica sala deve ser é inteiro, e não " . gettype($_GET['id_musica_sala']);
     echo json_encode($response);
     exit();
 }
@@ -24,7 +22,7 @@ include("../../classes/sala.php");
 $fila = new sala('');
 
 try {
-    $codigo = $fila->saiFila($conn, $idUsuario, $vars['id_musica_sala']);
+    $codigo = $fila->saiFila($conn, $idUsuario, $_GET['id_musica_sala']);
 
     if ($codigo['CODIGO'] == 2) {
         http_response_code(401);
