@@ -8,7 +8,7 @@ if(!isset($_GET['id_musica_sala'])) {
     exit();
 }
 
-if(!is_int($_GET['id_musica_sala'])) {
+if(!is_numeric($_GET['id_musica_sala'])) {
     $response = array();
     $response['id_musica_sala'] = false;
     $response['descricao'] = "Id da musica sala deve ser é inteiro, e não " . gettype($_GET['id_musica_sala']);
