@@ -5,7 +5,7 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Methods: POST, GET, PUT, DELETE');
 header('Content-Type: application/json; charset=utf-8');
-
+echo " ";
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {    
     return 0;    

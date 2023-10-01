@@ -5,7 +5,7 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Methods: POST, GET, PUT');
 header('Content-Type: application/json; charset=utf-8');
-
+echo " ";
 date_default_timezone_set('america/sao_paulo');
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {    
