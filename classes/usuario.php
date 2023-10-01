@@ -145,6 +145,20 @@
       $insert->execute();
     }
 
+    public function cadastraSpotify($conn) {
+      $insert = $conn->prepare(
+      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, tipo_plano) 
+      VALUES (:nome, :nick, :dataNasc, :email, 0)"
+      );
+      
+      $insert->bindParam(':nome', $this->nome);
+      $insert->bindParam(':nick', $this->nick);
+      $insert->bindParam(':dataNasc', $this->dataNasc);
+      $insert->bindParam(':email', $this->email);
+      
+      $insert->execute();
+    }
+
     public function login($conn) {
       $stmt = $conn->prepare("SELECT COUNT(*) AS total_email FROM [dbo].[Usuario] WHERE email = :email");
       $stmt->bindParam(":email", $this->email);

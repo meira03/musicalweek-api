@@ -1,24 +1,26 @@
 <?php
 
-    if(!isset($vars['nick'])) {
+    if (!isset($vars['nome']) || !isset($vars['nick']) || !isset($vars['data_nasc'])) {
+        $resposta = array();
+        $resposta['descricao'] = "";
+        if (!isset($vars['nome'])) {
+            $resposta['nome'] = null;
+            $resposta['descricao'] .= "Nome não enviado. ";
+        }
+        if (!isset($vars['nick'])) {
+            $resposta['nick'] = null;
+            $resposta['descricao'] .= "Nick não enviado. ";
+        }
+        if (!isset($vars['data_nasc'])) {
+            $resposta['data_nasc'] = null;
+            $resposta['descricao'] .= "Data de nascimento não enviada. ";
+        }
         http_response_code(400);
-        echo json_encode(array(
-            "nick" => null,
-            "descricao" => "Nick não enviado"
-        ), JSON_UNESCAPED_UNICODE);
+        echo json_encode($resposta);
         exit();
     }
-
-    if(!isset($vars['data_nasc'])) {
-        http_response_code(400);
-        echo json_encode(array(
-            "data_nasc" => null,
-            "descricao" => "Data de nascimento não enviada"
-        ), JSON_UNESCAPED_UNICODE);
-        exit();
-    }
-
-    $ch = curl_init('https://www.googleapis.com/oauth2/v2/userinfo?access_token=' . urlencode($vars['token_google']));
+    
+    $ch = curl_init('https://api.spotify.com/v1/me?access_token=' . urlencode($vars['token_spotify']));
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -28,7 +30,7 @@
     if ($resposta === false) {
         http_response_code(500);
         echo json_encode(array(
-            "erro" => 'Erro na requisição do Google: '. curl_error($ch)
+            "erro" => 'Erro na requisição do Spotify: '. curl_error($ch)
         ), JSON_UNESCAPED_UNICODE);
         exit();
     }
@@ -39,18 +41,18 @@
 
     echo " ";
 
-    if (isset($resposta['error_description'])) {
+    if (isset($resposta['error'])) {
         http_response_code(500);
         echo json_encode(array(
-            "erro" => 'Erro do Google: ' . $resposta['error_description']
+            "erro" => 'Erro do Spotify: ' . $resposta['error']['message']
         ), JSON_UNESCAPED_UNICODE);
         exit();
     }
 
-    if (!isset($resposta['email']) || !isset($resposta['name'])) {
+    if (!isset($resposta['email'])) {
         http_response_code(500);
         echo json_encode(array(
-            "erro" => 'Erro na requisição do Google'
+            "erro" => 'Erro na requisição do Spotify'
         ), JSON_UNESCAPED_UNICODE);
         exit();
     }
@@ -59,7 +61,7 @@
     include("../../classes/usuario.php");
     include("../../token/gera/token.php");
 
-    $cadastro = new Usuario($resposta['name'], $vars['nick'], $vars['data_nasc'], $resposta['email'], '');
+    $cadastro = new Usuario($vars['nome'], $vars['nick'], $vars['data_nasc'], $resposta['email'], '');
     $erro = array();
 
     if(!($cadastro->validarNome()))  $erro['nome'] = false;
@@ -84,7 +86,7 @@
     }
 
     try {
-        $cadastro->cadastraGoogle($conn);
+        $cadastro->cadastraSpotify($conn);
         http_response_code(200);
         echo json_encode(
           array(

@@ -64,7 +64,8 @@
     echo json_encode(
       array(
         'token' => gerarToken($conn->lastInsertId()),
-        'nick' => $cadastro->getNick()
+        'nick' => $cadastro->getNick(),
+        'plano' => 0
       )
     );
   } catch (PDOException $ex) {

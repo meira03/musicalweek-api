@@ -32,7 +32,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             include("login_google.php");
         }
     } elseif (isset($vars['token_spotify'])) {
-        include("login_spotify.php");
+        if (isset($vars['data_nasc']) || isset($vars['nick']) || isset($vars['nome'])) {
+            include("cadastro_spotify.php");
+        } else {
+            include("login_spotify.php");
+        }
     } elseif (!isset($vars['nome']) && !isset($vars['nick']) && !isset($vars['data_nasc'])) {
         include("login.php");
     } else {
