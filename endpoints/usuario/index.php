@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $vars = json_decode(file_get_contents('php://input'), true);
     if (isset($vars['token_google'])) {
-        if (isset($vars['data_nasc']) || isset($vars['nick'])) {
+        if (isset($vars['data_nasc']) || isset($vars['nick']) || isset($vars['nome'])) {
             include("cadastro_google.php");
         } else {
             include("login_google.php");
