@@ -491,7 +491,17 @@
     }
 
     public function delete($conn, $idUsuario) {
-      $query = "DELETE FROM Usuario WHERE id_usuario = :id";
+      $query = 
+        "UPDATE Usuario SET 
+          nome = null, 
+          username = null, 
+          icon = null, 
+          data_nasc = null, 
+          email = null, 
+          senha = null, 
+          tipo_plano = null, 
+          status = 2 
+        WHERE id_usuario = :id and (status <> 2 OR status IS NULL)";
       $stmt = $conn->prepare($query);
       $stmt->bindParam(':id', $idUsuario);
       $stmt->execute();
