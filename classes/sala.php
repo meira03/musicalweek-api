@@ -346,7 +346,8 @@
 
         public function getArtista($conn, $sala, $idUsuario) {
             $stmt = $conn->prepare(
-                "SELECT top 1 ms.id_usuario from MusicaSala ms join Sala s on s.id_sala = ms.id_sala where s.id_sala = :sala and s.tipo_sala = 2
+                "SELECT top 1 ms.id_usuario from MusicaSala ms join Sala s on s.id_sala = ms.id_sala 
+                where s.id_sala = :sala and s.tipo_sala = 2 and ms.id_musica is not null
 
                 select top 1 id_usuario from MusicaSala where id_usuario = :usuario and id_sala = :idsala");
             $stmt->bindParam(':sala', $sala);
@@ -355,19 +356,19 @@
 
             $stmt->execute();
 
-            if ($stmt->fetchColumn() === null) return null;
+            $idUsuario = $stmt->fetchColumn();
+
+            if ($idUsuario === null) return null;
 
             $stmt->nextRowset();
 
-            $idUsuario = $stmt->fetchColumn();
-
-            if ($idUsuario === null) return 0;
+            if ($stmt->fetchColumn() === null) return 0;
 
             return $idUsuario;
         }
 
         public function getSalaArtistaTotal($conn, $idSala, $idUsuario) {
-            $stmt = $conn->prepare('SP_INFO_SALA_ARTISTA :sala, :usuario');
+            $stmt = $conn->prepare('SP_PAINEL_SALA_ARTISTA :sala, :usuario');
             $stmt->bindParam(':sala', $idSala);
             $stmt->bindParam(':usuario', $idUsuario);
             $stmt->execute();
@@ -426,6 +427,40 @@
             return $musicas;
         }
 
+        public function getSalaArtista($conn, $idSala, $idUsuario) {
+            $stmt = $conn->prepare(
+                "SELECT
+                    MS.id_musicasala AS id_musica_sala,
+                    MS.id_musica AS musica,
+                    CASE WHEN A.nota IS NULL THEN NULL ELSE MS.nota_calculada END AS avaliacao_media,
+                    A.nota AS nota_usuario
+                FROM Sala AS S
+                INNER JOIN MusicaSala AS MS ON S.id_sala = MS.id_sala
+                LEFT JOIN Avaliacao AS A ON MS.id_musicasala = A.id_musicasala AND A.id_usuario = :usuario
+                WHERE S.id_sala = :sala
+                AND dbo.datacorreta() > S.data_criacao + MS.ordem_sala - 1
+                ORDER BY MS.ordem_sala;
+                
+                EXEC SP_INFO_SALA_ARTISTA :idsala");
+            $stmt->bindParam(':usuario', $idUsuario);
+            $stmt->bindParam(':sala', $idSala);
+            $stmt->bindParam(':idsala', $idSala);
+            $stmt->execute();
 
+            $musicas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $stmt->nextRowset();
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return [
+                "sala" => $result["sala"],
+                "tempo_restante" => $result["tempo_restante"],
+                "sala_finalizada" => $result["sala_finalizada"] == 1,
+                "nick_artista" => $result["username"],
+                "icon_artista" => $result["icon"],
+                "musicas" => $musicas
+            ];
+        }
     } 
 ?>

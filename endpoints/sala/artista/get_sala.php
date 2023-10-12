@@ -36,15 +36,11 @@
             exit();
         }
 
-        date_default_timezone_set('America/Sao_Paulo');
-
         if ($idArtista == $idUsuario) {
+            date_default_timezone_set('America/Sao_Paulo');
             echo json_encode($sala->getSalaArtistaTotal($conn, $_GET['id_sala'], $idUsuario));
         } else {
-            echo json_encode(array(
-                "erro" => "estamos em desenvolvimento",
-            ), JSON_UNESCAPED_UNICODE);
-            //echo json_encode($sala->getSalaArtista($conn, $_GET['id_sala']));
+            echo json_encode($sala->getSalaArtista($conn, $_GET['id_sala'], $idUsuario));
         }
     } catch (PDOException $ex) {
         http_response_code(500);
