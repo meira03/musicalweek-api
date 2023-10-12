@@ -6,6 +6,7 @@ if(!isset($vars['id_musica'])) {
     $response = array();
     $response['id_musica'] = null;
     $response['descricao'] = "Id da música não enviado";
+    http_response_code(400);
     echo json_encode($response);
     exit();
 }

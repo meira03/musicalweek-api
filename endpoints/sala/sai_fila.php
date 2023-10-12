@@ -4,6 +4,7 @@ if(!isset($_GET['id_musica_sala'])) {
     $response = array();
     $response['id_musica_sala'] = null;
     $response['descricao'] = "Id da musica sala não enviado";
+    http_response_code(400);
     echo json_encode($response);
     exit();
 }
@@ -12,6 +13,7 @@ if(!is_numeric($_GET['id_musica_sala'])) {
     $response = array();
     $response['id_musica_sala'] = false;
     $response['descricao'] = "Id da musica sala deve ser é inteiro";
+    http_response_code(400);
     echo json_encode($response);
     exit();
 }

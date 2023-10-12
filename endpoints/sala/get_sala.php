@@ -27,7 +27,18 @@
             exit();
         }
 
-        echo json_encode($sala->getInfo($conn, $idMusicaSala, $_GET['id_sala'], $idUsuario));
+        $info = $sala->getInfo($conn, $idMusicaSala, $_GET['id_sala'], $idUsuario);
+
+        if (isset($info["tipo_sala"])) {
+            http_response_code(403);
+            echo json_encode(array(
+                "tipo_sala" => false,
+                "descricao" => "Sala não padrão",
+            ), JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        echo json_encode($info);
 
     } catch (PDOException $ex) {
         http_response_code(500);

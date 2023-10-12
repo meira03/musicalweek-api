@@ -27,7 +27,7 @@
             http_response_code(202);
             echo json_encode(array(
                 "id_musica" => $fila['id_musica'],
-                "data_adicao_musica" => $fila['data_adicao_musica'],
+                "data_adicao_musica" => $fila['data_entrada'],
                 "tempo_estimado" => $fila['tempo_estimado']
             ), JSON_UNESCAPED_UNICODE);
         }
