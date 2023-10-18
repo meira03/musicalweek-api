@@ -115,11 +115,21 @@
         // }
         
         public function verifica($conn, $idMusicaSala) {
-            $stmt = $conn->prepare('SELECT id_sala, id_usuario, id_musica, data_entrada FROM MusicaSala WHERE id_musicasala = :id_musicasala');
+            $stmt = $conn->prepare('SELECT id_sala, id_usuario, id_musica, data_entrada FROM MusicaSala WHERE id_musicasala = :id_musicasala;
+            EXEC SP_ESTIMA_TEMPO');
             $stmt->bindParam(':id_musicasala', $idMusicaSala);
             $stmt->execute();
 
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+            $select = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->nextRowset();
+
+            return [
+                "id_sala" => $select["id_sala"],
+                "id_usuario" => $select["id_usuario"],
+                "id_musica" => $select["id_musica"],
+                "data_entrada" => $select["data_entrada"],
+                "tempo_estimado" => $stmt->fetchColumn()
+            ];
         }
 
         // public function getFila($conn, $idMusicaSala) {
