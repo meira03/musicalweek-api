@@ -283,16 +283,25 @@
 
         public function salasArtistasAtivas($conn) {
             $stmt = $conn->prepare(
-                "SELECT s.id_sala, s.nome, u.username, u.icon
-                FROM sala s
-                OUTER APPLY (
-                    SELECT TOP 1 mu.id_usuario
-                    FROM MusicaSala mu
-                    WHERE mu.id_sala = s.id_sala AND mu.id_musica IS NOT NULL
-                ) AS ms
-                JOIN usuario u ON ms.id_usuario = u.id_usuario
-                WHERE s.tipo_sala = 2
-                AND s.data_criacao >= DATEADD(day, -7, dbo.datacorreta());");
+                "SELECT s.id_sala, s.nome, u.username as nick, u.icon,
+                (
+                    SELECT TOP 1 A.id_musica
+                        FROM 
+                        MusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
+                        WHERE 
+                        dbo.datacorreta() < B.data_criacao + ordem_sala AND A.id_sala = s.id_sala
+                        ORDER BY 
+                        A.ordem_sala
+                ) as id_musica
+                    FROM sala s
+                    OUTER APPLY (
+                        SELECT TOP 1 mu.id_usuario
+                        FROM MusicaSala mu
+                        WHERE mu.id_sala = s.id_sala AND mu.id_musica IS NOT NULL
+                    ) AS ms
+                    JOIN usuario u ON ms.id_usuario = u.id_usuario
+                    WHERE s.tipo_sala = 2
+                    AND s.data_criacao >= DATEADD(day, -7, dbo.datacorreta());");
 
             $stmt->execute();
 
@@ -301,20 +310,32 @@
 
         public function salasArtistasAtivasLogado($conn, $idUsuario) {
             $stmt = $conn->prepare(
-                "SELECT s.id_sala, s.nome, u.username, u.icon, (
-                    select case when exists (select id_sala from MusicaSala where id_sala = s.id_sala and id_usuario = :usuario)
-                            then 1
-                            else 0
-                        end)as participante
-                FROM sala s
-                OUTER APPLY (
-                    SELECT TOP 1 mu.id_usuario
-                    FROM MusicaSala mu
-                    WHERE mu.id_sala = s.id_sala AND mu.id_musica IS NOT NULL
-                ) AS ms
-                JOIN usuario u ON ms.id_usuario = u.id_usuario
-                WHERE s.tipo_sala = 2
-                AND s.data_criacao >= DATEADD(day, -7, dbo.datacorreta());");
+                "SELECT s.id_sala, s.nome, u.username as nick, u.icon, 
+                (
+                    select case when exists 
+                    (select id_sala from MusicaSala where id_sala = s.id_sala and id_usuario = :usuario)
+                        then 1
+                        else 0
+                    end
+                ) as participante,
+                (
+                    SELECT TOP 1 A.id_musica
+                        FROM 
+                        MusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
+                        WHERE 
+                        dbo.datacorreta() < B.data_criacao + ordem_sala AND A.id_sala = s.id_sala
+                        ORDER BY 
+                        A.ordem_sala) as id_musica
+                        FROM sala s
+                        OUTER APPLY (
+                            SELECT TOP 1 mu.id_usuario
+                            FROM MusicaSala mu
+                            WHERE mu.id_sala = s.id_sala AND mu.id_musica IS NOT NULL
+                        ) AS ms
+                        JOIN usuario u ON ms.id_usuario = u.id_usuario
+                        WHERE s.tipo_sala = 2
+                        AND s.data_criacao >= DATEADD(day, -7, dbo.datacorreta()
+                );");
             $stmt->bindParam(':usuario', $idUsuario);
             $stmt->execute();
 
@@ -352,6 +373,55 @@
             $stmt->execute();
 
             return $stmt->fetchColumn();
+        }
+
+        public function saiSalaArtista($conn, $sala, $idUsuario) {
+            $stmt = $conn->prepare(
+                "SELECT TOP 1
+                    s.tipo_sala,
+                    u.id_usuario,
+                    s.data_criacao,
+                    DATEADD(day, -7, dbo.datacorreta()) AS verificacao,
+                    (
+                        SELECT TOP 1 status
+                        FROM MusicaSala
+                        WHERE id_usuario = :usuario AND id_sala = :sala
+                    ) AS status
+                FROM sala s
+                OUTER APPLY (
+                    SELECT TOP 1 mu.id_usuario
+                    FROM MusicaSala mu
+                    WHERE mu.id_sala = s.id_sala AND mu.id_musica IS NOT NULL
+                ) AS ms
+                JOIN usuario u ON ms.id_usuario = u.id_usuario
+                WHERE s.id_sala = :idsala;");
+            $stmt->bindParam(':usuario', $idUsuario);
+            $stmt->bindParam(':sala', $sala);
+            $stmt->bindParam(':idsala', $sala);
+            
+            $stmt->execute();
+
+            $select = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if($select['tipo_sala'] != 2) return 0;
+            if($select['id_usuario'] == $idUsuario) return 1;
+            if($select['data_criacao'] < $select['verificacao']) return 2;
+            if($select['status'] == 2 || $select['status'] == null) return 3;
+
+            $stmt = $conn->prepare(
+                "UPDATE MusicaSala
+                SET status = 2, data_saida = dbo.datacorreta()
+                WHERE id_usuario = :usuario AND id_sala = :sala AND id_musica is null;");
+            $stmt->bindParam(':sala', $sala);
+            $stmt->bindParam(':usuario', $idUsuario);
+
+            $stmt->execute();
+
+            if($stmt->rowCount() > 0){
+                return 5;
+            } else {
+                return 4;
+            }
         }
 
         public function getArtista($conn, $sala, $idUsuario) {

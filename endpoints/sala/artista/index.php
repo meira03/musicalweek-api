@@ -20,9 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } else {
         require_once("cria_sala.php");
     }
+} elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    require_once("sai_sala.php");
 } else {
     http_response_code(405);
-    echo json_encode(array('POST' => false, 'GET' => false));
+    echo json_encode(array('POST' => false, 'GET' => false, 'DELETE' => false));
     exit();
 }
 ?>
