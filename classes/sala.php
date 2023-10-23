@@ -180,6 +180,84 @@
             return $result;
         }
 
+        public function participantes($conn, $idSala, $idUsuario) {
+            $stmt = $conn->prepare(
+                "SELECT B.username AS nick, B.icon
+                FROM MusicaSala A
+                INNER JOIN Usuario B ON A.id_usuario = B.id_usuario
+                WHERE A.id_sala = :sala");
+
+            // $stmt->bindParam(':usuario', $idUsuario);
+            // $stmt->bindParam(':idsala', $idSala);
+            $stmt->bindParam(':sala', $idSala);
+            $stmt->execute();
+
+            // $codigo = $stmt->fetchColumn();
+
+            // if($codigo != null) return array('codigo' => $codigo);
+
+            // $stmt->nextRowset();
+
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($result as $key => $row) {
+                $result[$key]['icon'] = str_replace(' ', '', $row['icon']);
+            }
+            
+            return $result;
+        }
+
+        public function getMusica($conn, $idSala, $idUsuario, $posicao) {
+            $stmt = $conn->prepare(
+                "SELECT A.id_musicasala as id_musica_sala, A.id_musica as musica, 
+                A.nota_calculada as pontuacao, B.nota as nota_usuario 
+                    from MusicaSala A
+                        LEFT JOIN Avaliacao B ON A.id_musicasala = B.id_musicasala 
+                        AND B.id_usuario = :idUsuario
+                        where A.id_musicasala = 
+                        (
+                            SELECT A.id_musicasala from MusicaSala A
+                                INNER JOIN Sala B on A.id_sala = B.id_sala
+                                where dbo.datacorreta() > B.data_criacao + ordem_sala - 1
+                                and A.id_sala = :sala
+                                and A.ordem_sala = :posicao
+                        );
+                Select U.username AS nick, A.nota 
+                from Avaliacao A
+                LEFT JOIN Usuario U ON A.id_usuario = U.id_usuario
+                where A.id_musicasala = 
+                (
+                    select top 1 id_musicasala 
+                    from MusicaSala 
+                    where id_sala = :salaid and ordem_sala = :aposicao
+                )");
+
+            // $stmt->bindParam(':usuario', $idUsuario);
+            // $stmt->bindParam(':idsala', $idSala);
+            $stmt->bindParam(':idUsuario', $idUsuario);
+            $stmt->bindParam(':sala', $idSala);
+            $stmt->bindParam(':posicao', $posicao);
+            $stmt->bindParam(':salaid', $idSala);
+            $stmt->bindParam(':aposicao', $posicao);
+            $stmt->execute();
+
+            // $codigo = $stmt->fetchColumn();
+
+            // if($codigo != null) return array('codigo' => $codigo);
+
+            // $stmt->nextRowset();
+
+            $musica = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if($musica == null) {
+                return array('codigo' => 3);
+            } else {
+                $stmt->nextRowset();
+                $musica['avaliacoes'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                return $musica;
+            }
+        }
+
         private function getMusicas($conn, $idUsuario, $idSala) {
             $stmt = $conn->prepare(
                 "SELECT B.id_musicasala from Sala A
