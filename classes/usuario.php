@@ -560,19 +560,18 @@
     }
 
     public function getHistorico($conn, $idUsuario) {
-      $query = "SP_RETORNAHISTORICO :id";
-      $stmt = $conn->prepare($query);
+      $stmt = $conn->prepare("declare @i int;
+        EXEC SP_RETORNAHISTORICO :id, @i output;
+        select @i;");
       $stmt->bindParam(':id', $idUsuario);
       $stmt->execute();
 
-      $total = $stmt->fetchColumn();
-      
+      $stmt->nextRowset();
+      $salas = $stmt->fetchAll(PDO::FETCH_ASSOC);
       $stmt->nextRowset();
 
-      $salas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
       return array(
-        "total" => intval($total),
+        "total" => $stmt->fetchColumn(),
         "salas" => $salas
       );
     }
