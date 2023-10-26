@@ -143,73 +143,94 @@
         //     return $stmt->fetch(PDO::FETCH_ASSOC); 
         // }
 
-        public function getInfo($conn, $idMusicaSala, $idSala, $idUsuario) {
-            $stmt = $conn->prepare('SP_STATUS_SALA :idmusicasala');
-            $stmt->bindParam(':idmusicasala', $idMusicaSala);
+        // public function getInfo($conn, $idMusicaSala, $idSala, $idUsuario) {
+        //     $stmt = $conn->prepare('SP_STATUS_SALA :idmusicasala');
+        //     $stmt->bindParam(':idmusicasala', $idMusicaSala);
+        //     $stmt->execute();
+
+        //     $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        //     if ($result["tipo_sala"] != 1) return ["tipo_sala" => $result["tipo_sala"]];
+
+        //     return [
+        //         "sala" => $result["sala"],
+        //         "tempo_restante" => $result["tempo_restante"],
+        //         "sala_finalizada" => $result["sala_finalizada"] == 1,
+        //         "participantes" => $this->getParticipantes($conn, $idSala),
+        //         "musicas" => $this->getMusicas($conn, $idUsuario, $idSala)
+        //     ];
+        // }
+
+        public function getSala($conn, $idSala, $idUsuario) {
+            $stmt = $conn->prepare(
+                'EXEC SP_VISUALIZACAO_SALA :idsala, :usuario;
+                EXEC SP_STATUS_SALA :sala');
+            $stmt->bindParam(':idsala', $idSala);
+            $stmt->bindParam(':usuario', $idUsuario);
+            $stmt->bindParam(':sala', $idSala);
             $stmt->execute();
 
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->nextRowset();
+            $verificacao = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($result["tipo_sala"] != 1) return ["tipo_sala" => $result["tipo_sala"]];
+            if($verificacao['tipo_sala'] != 1) return array('codigo' => 1);
+            if($verificacao['participante'] != 1) return array('codigo' => 0);
+            if($verificacao['visualizacao'] != 1) return array('codigo' => 2);
+            
+            $stmt->nextRowset();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             return [
                 "sala" => $result["sala"],
                 "tempo_restante" => $result["tempo_restante"],
                 "sala_finalizada" => $result["sala_finalizada"] == 1,
-                "participantes" => $this->getParticipantes($conn, $idSala),
-                "musicas" => $this->getMusicas($conn, $idUsuario, $idSala)
             ];
         }
 
-        private function getParticipantes($conn, $idSala) {
-            $stmt = $conn->prepare(
-                "SELECT B.username AS nick, B.icon
-                FROM MusicaSala A
-                INNER JOIN Usuario B ON A.id_usuario = B.id_usuario
-                WHERE A.id_sala = :sala");
+        // private function getParticipantes($conn, $idSala) {
+        //     $stmt = $conn->prepare(
+        //         "SELECT B.username AS nick, B.icon
+        //         FROM MusicaSala A
+        //         INNER JOIN Usuario B ON A.id_usuario = B.id_usuario
+        //         WHERE A.id_sala = :sala");
 
-            $stmt->bindParam(':sala', $idSala);
-            $stmt->execute();
+        //     $stmt->bindParam(':sala', $idSala);
+        //     $stmt->execute();
 
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            foreach ($result as $key => $row) {
-                $result[$key]['icon'] = str_replace(' ', '', $row['icon']);
-            }
+        //     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            return $result;
-        }
+        //     return $result;
+        // }
 
         public function participantes($conn, $idSala, $idUsuario) {
             $stmt = $conn->prepare(
-                "SELECT B.username AS nick, B.icon
+                "SP_VISUALIZACAO_SALA :idsala, :usuario;
+                SELECT B.username AS nick, B.icon
                 FROM MusicaSala A
                 INNER JOIN Usuario B ON A.id_usuario = B.id_usuario
                 WHERE A.id_sala = :sala");
 
-            // $stmt->bindParam(':usuario', $idUsuario);
-            // $stmt->bindParam(':idsala', $idSala);
+            $stmt->bindParam(':usuario', $idUsuario);
+            $stmt->bindParam(':idsala', $idSala);
             $stmt->bindParam(':sala', $idSala);
             $stmt->execute();
 
-            // $codigo = $stmt->fetchColumn();
+            $stmt->nextRowset();
+            $verificacao = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // if($codigo != null) return array('codigo' => $codigo);
-
-            // $stmt->nextRowset();
-
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            foreach ($result as $key => $row) {
-                $result[$key]['icon'] = str_replace(' ', '', $row['icon']);
-            }
+            if($verificacao['tipo_sala'] != 1) return array('codigo' => 1);
+            if($verificacao['participante'] != 1) return array('codigo' => 0);
+            if($verificacao['visualizacao'] != 1) return array('codigo' => 2);
             
-            return $result;
+            $stmt->nextRowset();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         public function getMusica($conn, $idSala, $idUsuario, $posicao) {
             $stmt = $conn->prepare(
-                "SELECT A.id_musicasala as id_musica_sala, A.id_musica as musica, 
+                "SP_VISUALIZACAO_SALA :idsala, :usuario;
+                SELECT A.id_musicasala as id_musica_sala, A.id_musica as musica, 
                 A.nota_calculada as pontuacao, B.nota as nota_usuario 
                     from MusicaSala A
                         LEFT JOIN Avaliacao B ON A.id_musicasala = B.id_musicasala 
@@ -232,8 +253,8 @@
                     where id_sala = :salaid and ordem_sala = :aposicao
                 )");
 
-            // $stmt->bindParam(':usuario', $idUsuario);
-            // $stmt->bindParam(':idsala', $idSala);
+            $stmt->bindParam(':usuario', $idUsuario);
+            $stmt->bindParam(':idsala', $idSala);
             $stmt->bindParam(':idUsuario', $idUsuario);
             $stmt->bindParam(':sala', $idSala);
             $stmt->bindParam(':posicao', $posicao);
@@ -241,11 +262,14 @@
             $stmt->bindParam(':aposicao', $posicao);
             $stmt->execute();
 
-            // $codigo = $stmt->fetchColumn();
+            $stmt->nextRowset();
+            $verificacao = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // if($codigo != null) return array('codigo' => $codigo);
-
-            // $stmt->nextRowset();
+            if($verificacao['tipo_sala'] != 1) return array('codigo' => 1);
+            if($verificacao['participante'] != 1) return array('codigo' => 0);
+            if($verificacao['visualizacao'] != 1) return array('codigo' => 2);
+            
+            $stmt->nextRowset();
 
             $musica = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -258,55 +282,55 @@
             }
         }
 
-        private function getMusicas($conn, $idUsuario, $idSala) {
-            $stmt = $conn->prepare(
-                "SELECT B.id_musicasala from Sala A
-                INNER JOIN MusicaSala B on A.id_sala = B.id_sala
-                where B.id_sala = :sala order by ordem_sala");
-            $stmt->bindParam(':sala', $idSala);
-            $stmt->execute();
+        // private function getMusicas($conn, $idUsuario, $idSala) {
+        //     $stmt = $conn->prepare(
+        //         "SELECT B.id_musicasala from Sala A
+        //         INNER JOIN MusicaSala B on A.id_sala = B.id_sala
+        //         where B.id_sala = :sala order by ordem_sala");
+        //     $stmt->bindParam(':sala', $idSala);
+        //     $stmt->execute();
 
-            $idsMusicaSala = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        //     $idsMusicaSala = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $stmt = $conn->prepare(
-                "SELECT top 1 A.id_musicasala from MusicaSala A
-                INNER JOIN Sala B on A.id_sala = B.id_sala
-                where dbo.datacorreta() < B.data_criacao + ordem_sala
-                and A.id_sala = :sala order by ordem_sala");
-            $stmt->bindParam(':sala', $idSala);
-            $stmt->execute();
+        //     $stmt = $conn->prepare(
+        //         "SELECT top 1 A.id_musicasala from MusicaSala A
+        //         INNER JOIN Sala B on A.id_sala = B.id_sala
+        //         where dbo.datacorreta() < B.data_criacao + ordem_sala
+        //         and A.id_sala = :sala order by ordem_sala");
+        //     $stmt->bindParam(':sala', $idSala);
+        //     $stmt->execute();
 
-            $musicaAtual = $stmt->fetch(PDO::FETCH_COLUMN);
+        //     $musicaAtual = $stmt->fetch(PDO::FETCH_COLUMN);
 
-            $musicas = array();
+        //     $musicas = array();
 
-            foreach ($idsMusicaSala as $row) {
-                $musicaId = $row['id_musicasala'];
-                $stmt = $conn->prepare(
-                    "SELECT A.id_musica, A.nota_calculada, B.nota from MusicaSala A
-                    LEFT JOIN Avaliacao B ON A.id_musicasala = B.id_musicasala 
-                    AND B.id_usuario = :usuario
-                    where A.id_musicasala = :musicaid");
-                $stmt->bindParam(':usuario', $idUsuario);
-                $stmt->bindParam(':musicaid', $musicaId);
+        //     foreach ($idsMusicaSala as $row) {
+        //         $musicaId = $row['id_musicasala'];
+        //         $stmt = $conn->prepare(
+        //             "SELECT A.id_musica, A.nota_calculada, B.nota from MusicaSala A
+        //             LEFT JOIN Avaliacao B ON A.id_musicasala = B.id_musicasala 
+        //             AND B.id_usuario = :usuario
+        //             where A.id_musicasala = :musicaid");
+        //         $stmt->bindParam(':usuario', $idUsuario);
+        //         $stmt->bindParam(':musicaid', $musicaId);
 
-                $stmt->execute();
+        //         $stmt->execute();
 
-                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        //         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                array_push($musicas, [
-                    "id_musica_sala" => $musicaId,
-                    "musica" => $result["id_musica"],
-                    "avaliacao_media" =>  $result["nota_calculada"],
-                    "nota_usuario" => $result["nota"],
-                    "avaliacoes" => $this->getAvaliacoes($conn, $musicaId, $idSala)
-                ]);
+        //         array_push($musicas, [
+        //             "id_musica_sala" => $musicaId,
+        //             "musica" => $result["id_musica"],
+        //             "avaliacao_media" =>  $result["nota_calculada"],
+        //             "nota_usuario" => $result["nota"],
+        //             "avaliacoes" => $this->getAvaliacoes($conn, $musicaId, $idSala)
+        //         ]);
 
-                if ($musicaAtual == $musicaId) break;
-            }
+        //         if ($musicaAtual == $musicaId) break;
+        //     }
 
-            return $musicas;
-        }
+        //     return $musicas;
+        // }
 
         // private function getMedia($conn, $musicaId) {
         //     $Avaliacoes = $this->getAvaliacoes($conn, $musicaId);
@@ -326,38 +350,38 @@
         //     return round($soma / $total, 2);
         // }
 
-        private function getAvaliacoes($conn, $musicaId, $idSala) {
-            $stmt = $conn->prepare(
-                "SELECT U.username AS nick, A.nota
-                FROM MusicaSala MS
-                LEFT JOIN Avaliacao A ON MS.id_musicasala = A.id_musicasala
-                LEFT JOIN Usuario U ON A.id_usuario = U.id_usuario
-                WHERE MS.id_musica = (select id_musica from MusicaSala where id_musicasala = :musicaid)
-                and MS.id_sala = :sala");
-            $stmt->bindParam(':musicaid', $musicaId);
-            $stmt->bindParam(':sala', $idSala);
+        // private function getAvaliacoes($conn, $musicaId, $idSala) {
+        //     $stmt = $conn->prepare(
+        //         "SELECT U.username AS nick, A.nota
+        //         FROM MusicaSala MS
+        //         LEFT JOIN Avaliacao A ON MS.id_musicasala = A.id_musicasala
+        //         LEFT JOIN Usuario U ON A.id_usuario = U.id_usuario
+        //         WHERE MS.id_musica = (select id_musica from MusicaSala where id_musicasala = :musicaid)
+        //         and MS.id_sala = :sala");
+        //     $stmt->bindParam(':musicaid', $musicaId);
+        //     $stmt->bindParam(':sala', $idSala);
 
-            $stmt->execute();
+        //     $stmt->execute();
 
-            $resposta = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        //     $resposta = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            if(empty($resposta) || $resposta[0]['nick'] == null) {
-                return null;
-            } else {
-                return $resposta;
-            }
-        }
+        //     if(empty($resposta) || $resposta[0]['nick'] == null) {
+        //         return null;
+        //     } else {
+        //         return $resposta;
+        //     }
+        // }
 
-        public function selectIdMusicaSala($conn, $sala, $idUsuario) {
-            $stmt = $conn->prepare(
-                "SELECT id_musicasala from MusicaSala where id_usuario = :usuario and id_sala = :sala");
-            $stmt->bindParam(':usuario', $idUsuario);
-            $stmt->bindParam(':sala', $sala);
+        // public function selectIdMusicaSala($conn, $sala, $idUsuario) {
+        //     $stmt = $conn->prepare(
+        //         "SELECT id_musicasala from MusicaSala where id_usuario = :usuario and id_sala = :sala");
+        //     $stmt->bindParam(':usuario', $idUsuario);
+        //     $stmt->bindParam(':sala', $sala);
 
-            $stmt->execute();
+        //     $stmt->execute();
 
-            return $stmt->fetchColumn();
-        }
+        //     return $stmt->fetchColumn();
+        // }
 
         public function salasArtistasAtivas($conn) {
             $stmt = $conn->prepare(
@@ -420,7 +444,7 @@
             $resposta = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             foreach ($resposta as &$row) {
-                $row['participante'] = $row['participante'] == 1 ? true : false;
+                $row['participante'] = $row['participante'] == 1;
             }
 
             return $resposta;
