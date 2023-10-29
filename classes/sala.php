@@ -205,14 +205,15 @@
         public function participantes($conn, $idSala, $idUsuario) {
             $stmt = $conn->prepare(
                 "SP_VISUALIZACAO_SALA :idsala, :usuario;
-                SELECT B.username AS nick, B.icon
+                SELECT TOP 6 B.username AS nick, B.icon
                 FROM MusicaSala A
                 INNER JOIN Usuario B ON A.id_usuario = B.id_usuario
-                WHERE A.id_sala = :sala");
+                WHERE A.id_sala = :sala and A.id_usuario != :idUsuario");
 
             $stmt->bindParam(':usuario', $idUsuario);
             $stmt->bindParam(':idsala', $idSala);
             $stmt->bindParam(':sala', $idSala);
+            $stmt->bindParam(':idUsuario', $idUsuario);
             $stmt->execute();
 
             $stmt->nextRowset();
@@ -279,6 +280,40 @@
                 $stmt->nextRowset();
                 $musica['avaliacoes'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 return $musica;
+            }
+        }
+
+        public function getFinal($conn, $idSala, $idUsuario) {
+            $stmt = $conn->prepare(
+                "SP_VISUALIZACAO_SALA :idsala, :usuario;
+                SELECT top 7 M.id_musica musica, M.nota_calculada pontuacao, u.username usuario_dono, u.icon icone 
+                    from MusicaSala M 
+                    join Usuario U on M.id_usuario = U.id_usuario 
+                    join Sala S on M.id_sala = S.id_sala 
+                    where M.id_sala = :sala
+                    and s.data_criacao < DATEADD(day, -7, dbo.datacorreta()) 
+                    order by M.nota_calculada desc");
+
+            $stmt->bindParam(':usuario', $idUsuario);
+            $stmt->bindParam(':idsala', $idSala);
+            $stmt->bindParam(':sala', $idSala);
+            $stmt->execute();
+
+            $stmt->nextRowset();
+            $verificacao = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if($verificacao['tipo_sala'] != 1) return array('codigo' => 1);
+            if($verificacao['participante'] != 1) return array('codigo' => 0);
+            if($verificacao['visualizacao'] != 1) return array('codigo' => 2);
+            
+            $stmt->nextRowset();
+
+            $final = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if($final == null) {
+                return array('codigo' => 3);
+            } else {
+                return $final;
             }
         }
 
