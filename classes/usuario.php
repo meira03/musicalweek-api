@@ -39,7 +39,7 @@
         $hoje = new DateTime();
         $diferenca = $hoje->diff($dateObj);
 
-        return $diferenca->y >= 18;
+        return $diferenca->y >= 18 && $diferenca->y <= 130;
       } else {
         return false;
       }
