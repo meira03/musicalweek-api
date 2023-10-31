@@ -244,15 +244,22 @@
                                 and A.id_sala = :sala
                                 and A.ordem_sala = :posicao
                         );
-                Select U.username AS nick, A.nota 
-                from Avaliacao A
-                LEFT JOIN Usuario U ON A.id_usuario = U.id_usuario
-                where A.id_musicasala = 
-                (
-                    select top 1 id_musicasala 
-                    from MusicaSala 
-                    where id_sala = :salaid and ordem_sala = :aposicao
-                )");
+                SELECT U.username AS nick, A.nota 
+                FROM Usuario U
+                LEFT JOIN (
+                    SELECT id_usuario, nota
+                    FROM Avaliacao
+                    WHERE id_musicasala = (
+                        SELECT TOP 1 id_musicasala 
+                        FROM MusicaSala 
+                        WHERE id_sala = :salaid AND ordem_sala = :aposicao
+                    )
+                ) A ON U.id_usuario = A.id_usuario
+                WHERE U.id_usuario IN (
+                    SELECT TOP 6 B.id_usuario
+                    FROM MusicaSala B
+                    WHERE B.id_sala = :iddasala AND B.id_usuario != :usuarioid
+                );");
 
             $stmt->bindParam(':usuario', $idUsuario);
             $stmt->bindParam(':idsala', $idSala);
@@ -261,6 +268,8 @@
             $stmt->bindParam(':posicao', $posicao);
             $stmt->bindParam(':salaid', $idSala);
             $stmt->bindParam(':aposicao', $posicao);
+            $stmt->bindParam(':iddasala', $idSala);
+            $stmt->bindParam(':usuarioid', $idUsuario);
             $stmt->execute();
 
             $stmt->nextRowset();
@@ -278,7 +287,12 @@
                 return array('codigo' => 3);
             } else {
                 $stmt->nextRowset();
-                $musica['avaliacoes'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if($musica['nota_usuario'] === null){
+                    $musica['avaliacoes'] = array();
+                    $musica['pontuacao'] = null;
+                } else {
+                    $musica['avaliacoes'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                }
                 return $musica;
             }
         }
