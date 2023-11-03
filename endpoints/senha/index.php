@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     include("troca_senha.php");
 } else {
     http_response_code(405);
-    echo json_encode(array('POST' => false, 'GET' => false));
+    echo json_encode(array('POST' => false, 'GET' => false, 'PUT' => false));
     exit();
 }
 ?>

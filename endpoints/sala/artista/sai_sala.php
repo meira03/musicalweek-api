@@ -53,7 +53,7 @@ try {
     }
 
     if ($codigo == 1) {
-        http_response_code(404);
+        http_response_code(403);
         echo json_encode(array(
             "artista" => true,
             "descricao" => "Artista não pode sair da sala",

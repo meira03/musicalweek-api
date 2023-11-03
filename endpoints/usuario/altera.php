@@ -17,7 +17,7 @@
     }
     if (!isset($vars['icon'])) {
       $resposta['icon'] = null;
-      $resposta['descricao'] .= "Icone não enviado. ";
+      $resposta['descricao'] .= "Icone não enviado.";
     }
     http_response_code(400);
     echo json_encode($resposta);

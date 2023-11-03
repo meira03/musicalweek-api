@@ -30,8 +30,8 @@
             if ($sala['codigo'] == 1) {
                 http_response_code(403);
                 echo json_encode(array(
-                    "tipo_sala" => false,
-                    "descricao" => "Sala não padrão",
+                    "sala" => false,
+                    "descricao" => "Sala não existe",
                 ), JSON_UNESCAPED_UNICODE);
                 exit();
             }
