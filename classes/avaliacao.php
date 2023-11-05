@@ -21,7 +21,7 @@
         }
 
         public function avaliacaoMedia($conn) {
-            $select =  $conn->prepare("SELECT nota_calculada from MusicaSala where id_musicasala = :musicasala");
+            $select =  $conn->prepare("SELECT nota_calculada from UsuarioMusicaSala where id_usuariomusicasala = :musicasala");
             $select->bindParam(":musicasala", $this->idSala);
             $select->execute();
 
@@ -29,7 +29,7 @@
         }
 
         public function topMusicas($conn) {
-            $select =  $conn->prepare("SELECT top 10 id_musica from MusicaSala");
+            $select =  $conn->prepare("SELECT top 10 id_musica from UsuarioMusicaSala");
             $select->execute();
 
             return array_column($select->fetchAll(PDO::FETCH_ASSOC), 'id_musica');

@@ -527,7 +527,7 @@
     }
 
     public function getFila($conn, $idUsuario) {
-      $query = "SELECT id_musicasala, id_musica from MusicaSala where status = 0 and id_usuario = :id";
+      $query = "SELECT id_usuariomusicasala, id_musica from UsuarioMusicaSala where status = 0 and id_usuario = :id";
       $stmt = $conn->prepare($query);
       $stmt->bindParam(':id', $idUsuario);
       $stmt->execute();
@@ -542,13 +542,13 @@
             S.nome,
             (SELECT TOP 1 A.id_musica
             FROM 
-                MusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
+                UsuarioMusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
             WHERE 
             dbo.datacorreta() < B.data_criacao + ordem_sala AND A.id_sala = MS.id_sala
             ORDER BY 
                 A.ordem_sala) AS id_musica
         FROM
-            MusicaSala MS
+            UsuarioMusicaSala MS
             INNER JOIN Sala S ON MS.id_sala = S.id_sala
         WHERE
             MS.id_usuario = :id and dbo.datacorreta() < DATEADD(DAY,7,S.data_criacao)";

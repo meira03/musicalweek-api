@@ -16,7 +16,7 @@ if ($_GET['codigo'] != "26Kf7A0m2X9rl5Ai2" || !isset($_GET['sala'])) {
 
 try {
     $stmt = $conn->prepare(
-        "SELECT u.email from MusicaSala ms inner join Usuario u 
+        "SELECT u.email from UsuarioMusicaSala ms inner join Usuario u 
         on u.id_usuario = ms.id_usuario 
         where ms.id_sala = :sala and u.status = 1");
     $stmt->bindParam(':sala', $_GET['sala']);

@@ -9,7 +9,7 @@
                 "SELECT SUM(total_registros) AS total_geral
                 FROM (
                     SELECT COUNT(*) AS total_registros
-                    FROM MusicaSala MS
+                    FROM UsuarioMusicaSala MS
                     INNER JOIN Sala S ON MS.id_sala = S.id_sala
                     WHERE MS.id_usuario = :id AND dbo.datacorreta() < DATEADD(DAY, 7, S.data_criacao)
                     and S.tipo_sala = 1
@@ -17,7 +17,7 @@
                     UNION ALL
                 
                     SELECT COUNT(*) AS total_registros
-                    FROM MusicaSala
+                    FROM UsuarioMusicaSala
                     WHERE status = 0 AND id_usuario = :idu
                 ) AS subquery;
                 
@@ -63,7 +63,7 @@
             $idMusicaSala = $conn->lastInsertId();
 
             $select = $conn->prepare(
-                "SELECT id_sala from MusicaSala where id_musicasala = :id"
+                "SELECT id_sala from UsuarioMusicaSala where id_usuariomusicasala = :id"
             );
             $select->bindParam(':id', $idMusicaSala);
             $select->execute();
@@ -87,20 +87,20 @@
         // public function buscaSalas($conn, $idUsuario) {
         //     $query = 
         //     "SELECT
-        //     MS.id_musicasala AS id_musica_sala,
+        //     MS.id_usuariomusicasala AS id_musica_sala,
         //     S.nome AS nome_sala,
         //     isnull((SELECT TOP 1 A.id_musica
         //      FROM 
-        //         MusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
+        //         UsuarioMusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
         //      WHERE 
         //      :dataatual < B.data_criacao + ordem_sala AND A.id_sala = MS.id_sala
         //      ORDER BY 
         //         A.ordem_sala),(select TOP 1 A.id_musica
         //      FROM 
-        //         MusicaSala A WHERE 
-        //         A.id_musicasala = MS.id_musicasala)) AS id_musica
+        //         UsuarioMusicaSala A WHERE 
+        //         A.id_usuariomusicasala = MS.id_usuariomusicasala)) AS id_musica
         // FROM
-        //     MusicaSala MS
+        //     UsuarioMusicaSala MS
         //     LEFT JOIN Sala S ON MS.id_sala = S.id_sala
         // WHERE
         //     MS.id_usuario = :id_usuario and
@@ -115,7 +115,7 @@
         // }
         
         public function verifica($conn, $idMusicaSala) {
-            $stmt = $conn->prepare('SELECT id_sala, id_usuario, id_musica, data_entrada FROM MusicaSala WHERE id_musicasala = :id_musicasala;
+            $stmt = $conn->prepare('SELECT id_sala, id_usuario, id_musica, data_entrada FROM UsuarioMusicaSala WHERE id_usuariomusicasala = :id_musicasala;
             EXEC SP_ESTIMA_TEMPO');
             $stmt->bindParam(':id_musicasala', $idMusicaSala);
             $stmt->execute();
@@ -135,8 +135,8 @@
         // public function getFila($conn, $idMusicaSala) {
         //     $stmt = $conn->prepare(
         //         'SELECT MS.id_sala AS sala, MS.id_musica AS musica
-        //         FROM MusicaSala MS
-        //         WHERE MS.id_musicasala = :id_musicasala;');
+        //         FROM UsuarioMusicaSala MS
+        //         WHERE MS.id_usuariomusicasala = :id_musicasala;');
         //     $stmt->bindParam(':id_musicasala', $idMusicaSala);
         //     $stmt->execute();
             
@@ -190,7 +190,7 @@
         // private function getParticipantes($conn, $idSala) {
         //     $stmt = $conn->prepare(
         //         "SELECT B.username AS nick, B.icon
-        //         FROM MusicaSala A
+        //         FROM UsuarioMusicaSala A
         //         INNER JOIN Usuario B ON A.id_usuario = B.id_usuario
         //         WHERE A.id_sala = :sala");
 
@@ -206,7 +206,7 @@
             $stmt = $conn->prepare(
                 "SP_VISUALIZACAO_SALA :idsala, :usuario;
                 SELECT TOP 6 B.username AS nick, B.icon
-                FROM MusicaSala A
+                FROM UsuarioMusicaSala A
                 INNER JOIN Usuario B ON A.id_usuario = B.id_usuario
                 WHERE A.id_sala = :sala and A.id_usuario != :idUsuario");
 
@@ -231,14 +231,14 @@
         public function getMusica($conn, $idSala, $idUsuario, $posicao) {
             $stmt = $conn->prepare(
                 "SP_VISUALIZACAO_SALA :idsala, :usuario;
-                SELECT A.id_musicasala as id_musica_sala, A.id_musica as musica, 
+                SELECT A.id_usuariomusicasala as id_musica_sala, A.id_musica as musica, 
                 A.nota_calculada as pontuacao, B.nota as nota_usuario 
-                    from MusicaSala A
-                        LEFT JOIN Avaliacao B ON A.id_musicasala = B.id_musicasala 
+                    from UsuarioMusicaSala A
+                        LEFT JOIN Avaliacao B ON A.id_usuariomusicasala = B.id_usuariomusicasala 
                         AND B.id_usuario = :idUsuario
-                        where A.id_musicasala = 
+                        where A.id_usuariomusicasala = 
                         (
-                            SELECT A.id_musicasala from MusicaSala A
+                            SELECT A.id_usuariomusicasala from UsuarioMusicaSala A
                                 INNER JOIN Sala B on A.id_sala = B.id_sala
                                 where dbo.datacorreta() > B.data_criacao + ordem_sala - 1
                                 and A.id_sala = :sala
@@ -249,15 +249,15 @@
                 LEFT JOIN (
                     SELECT id_usuario, nota
                     FROM Avaliacao
-                    WHERE id_musicasala = (
-                        SELECT TOP 1 id_musicasala 
-                        FROM MusicaSala 
+                    WHERE id_usuariomusicasala = (
+                        SELECT TOP 1 id_usuariomusicasala 
+                        FROM UsuarioMusicaSala 
                         WHERE id_sala = :salaid AND ordem_sala = :aposicao
                     )
                 ) A ON U.id_usuario = A.id_usuario
                 WHERE U.id_usuario IN (
                     SELECT TOP 6 B.id_usuario
-                    FROM MusicaSala B
+                    FROM UsuarioMusicaSala B
                     WHERE B.id_sala = :iddasala AND B.id_usuario != :usuarioid
                 );");
 
@@ -301,7 +301,7 @@
             $stmt = $conn->prepare(
                 "SP_VISUALIZACAO_SALA :idsala, :usuario;
                 SELECT top 7 M.id_musica musica, M.nota_calculada pontuacao, u.username usuario_dono, u.icon icone 
-                    from MusicaSala M 
+                    from UsuarioMusicaSala M 
                     join Usuario U on M.id_usuario = U.id_usuario 
                     join Sala S on M.id_sala = S.id_sala 
                     where M.id_sala = :sala
@@ -333,8 +333,8 @@
 
         // private function getMusicas($conn, $idUsuario, $idSala) {
         //     $stmt = $conn->prepare(
-        //         "SELECT B.id_musicasala from Sala A
-        //         INNER JOIN MusicaSala B on A.id_sala = B.id_sala
+        //         "SELECT B.id_usuariomusicasala from Sala A
+        //         INNER JOIN UsuarioMusicaSala B on A.id_sala = B.id_sala
         //         where B.id_sala = :sala order by ordem_sala");
         //     $stmt->bindParam(':sala', $idSala);
         //     $stmt->execute();
@@ -342,7 +342,7 @@
         //     $idsMusicaSala = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         //     $stmt = $conn->prepare(
-        //         "SELECT top 1 A.id_musicasala from MusicaSala A
+        //         "SELECT top 1 A.id_usuariomusicasala from UsuarioMusicaSala A
         //         INNER JOIN Sala B on A.id_sala = B.id_sala
         //         where dbo.datacorreta() < B.data_criacao + ordem_sala
         //         and A.id_sala = :sala order by ordem_sala");
@@ -356,10 +356,10 @@
         //     foreach ($idsMusicaSala as $row) {
         //         $musicaId = $row['id_musicasala'];
         //         $stmt = $conn->prepare(
-        //             "SELECT A.id_musica, A.nota_calculada, B.nota from MusicaSala A
-        //             LEFT JOIN Avaliacao B ON A.id_musicasala = B.id_musicasala 
+        //             "SELECT A.id_musica, A.nota_calculada, B.nota from UsuarioMusicaSala A
+        //             LEFT JOIN Avaliacao B ON A.id_usuariomusicasala = B.id_usuariomusicasala 
         //             AND B.id_usuario = :usuario
-        //             where A.id_musicasala = :musicaid");
+        //             where A.id_usuariomusicasala = :musicaid");
         //         $stmt->bindParam(':usuario', $idUsuario);
         //         $stmt->bindParam(':musicaid', $musicaId);
 
@@ -402,10 +402,10 @@
         // private function getAvaliacoes($conn, $musicaId, $idSala) {
         //     $stmt = $conn->prepare(
         //         "SELECT U.username AS nick, A.nota
-        //         FROM MusicaSala MS
-        //         LEFT JOIN Avaliacao A ON MS.id_musicasala = A.id_musicasala
+        //         FROM UsuarioMusicaSala MS
+        //         LEFT JOIN Avaliacao A ON MS.id_usuariomusicasala = A.id_usuariomusicasala
         //         LEFT JOIN Usuario U ON A.id_usuario = U.id_usuario
-        //         WHERE MS.id_musica = (select id_musica from MusicaSala where id_musicasala = :musicaid)
+        //         WHERE MS.id_musica = (select id_musica from UsuarioMusicaSala where id_usuariomusicasala = :musicaid)
         //         and MS.id_sala = :sala");
         //     $stmt->bindParam(':musicaid', $musicaId);
         //     $stmt->bindParam(':sala', $idSala);
@@ -423,7 +423,7 @@
 
         // public function selectIdMusicaSala($conn, $sala, $idUsuario) {
         //     $stmt = $conn->prepare(
-        //         "SELECT id_musicasala from MusicaSala where id_usuario = :usuario and id_sala = :sala");
+        //         "SELECT id_usuariomusicasala from UsuarioMusicaSala where id_usuario = :usuario and id_sala = :sala");
         //     $stmt->bindParam(':usuario', $idUsuario);
         //     $stmt->bindParam(':sala', $sala);
 
@@ -438,7 +438,7 @@
                 (
                     SELECT TOP 1 A.id_musica
                         FROM 
-                        MusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
+                        UsuarioMusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
                         WHERE 
                         dbo.datacorreta() < B.data_criacao + ordem_sala AND A.id_sala = s.id_sala
                         ORDER BY 
@@ -447,7 +447,7 @@
                     FROM sala s
                     OUTER APPLY (
                         SELECT TOP 1 mu.id_usuario
-                        FROM MusicaSala mu
+                        FROM UsuarioMusicaSala mu
                         WHERE mu.id_sala = s.id_sala AND mu.id_musica IS NOT NULL
                     ) AS ms
                     JOIN usuario u ON ms.id_usuario = u.id_usuario
@@ -464,7 +464,7 @@
                 "SELECT s.id_sala, s.nome, u.username as nick, u.icon, 
                 (
                     select case when exists 
-                    (select id_sala from MusicaSala where id_sala = s.id_sala and id_usuario = :usuario)
+                    (select id_sala from UsuarioMusicaSala where id_sala = s.id_sala and id_usuario = :usuario)
                         then 1
                         else 0
                     end
@@ -472,7 +472,7 @@
                 (
                     SELECT TOP 1 A.id_musica
                         FROM 
-                        MusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
+                        UsuarioMusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
                         WHERE 
                         dbo.datacorreta() < B.data_criacao + ordem_sala AND A.id_sala = s.id_sala
                         ORDER BY 
@@ -480,7 +480,7 @@
                         FROM sala s
                         OUTER APPLY (
                             SELECT TOP 1 mu.id_usuario
-                            FROM MusicaSala mu
+                            FROM UsuarioMusicaSala mu
                             WHERE mu.id_sala = s.id_sala AND mu.id_musica IS NOT NULL
                         ) AS ms
                         JOIN usuario u ON ms.id_usuario = u.id_usuario
@@ -535,13 +535,13 @@
                     DATEADD(day, -7, dbo.datacorreta()) AS verificacao,
                     (
                         SELECT TOP 1 status
-                        FROM MusicaSala
+                        FROM UsuarioMusicaSala
                         WHERE id_usuario = :usuario AND id_sala = :sala
                     ) AS status
                 FROM sala s
                 OUTER APPLY (
                     SELECT TOP 1 mu.id_usuario
-                    FROM MusicaSala mu
+                    FROM UsuarioMusicaSala mu
                     WHERE mu.id_sala = s.id_sala AND mu.id_musica IS NOT NULL
                 ) AS ms
                 JOIN usuario u ON ms.id_usuario = u.id_usuario
@@ -560,7 +560,7 @@
             if($select['status'] == 2 || $select['status'] == null) return 3;
 
             $stmt = $conn->prepare(
-                "UPDATE MusicaSala
+                "UPDATE UsuarioMusicaSala
                 SET status = 2, data_saida = dbo.datacorreta()
                 WHERE id_usuario = :usuario AND id_sala = :sala AND id_musica is null;");
             $stmt->bindParam(':sala', $sala);
@@ -577,10 +577,10 @@
 
         public function getArtista($conn, $sala, $idUsuario) {
             $stmt = $conn->prepare(
-                "SELECT top 1 ms.id_usuario from MusicaSala ms join Sala s on s.id_sala = ms.id_sala 
+                "SELECT top 1 ms.id_usuario from UsuarioMusicaSala ms join Sala s on s.id_sala = ms.id_sala 
                 where s.id_sala = :sala and s.tipo_sala = 2 and ms.id_musica is not null
 
-                select top 1 id_usuario from MusicaSala where id_usuario = :usuario and id_sala = :idsala");
+                select top 1 id_usuario from UsuarioMusicaSala where id_usuario = :usuario and id_sala = :idsala");
             $stmt->bindParam(':sala', $sala);
             $stmt->bindParam(':usuario', $idUsuario);
             $stmt->bindParam(':idsala', $sala);
@@ -620,7 +620,7 @@
         private function getParticipantesArtista($conn, $idSala) {
             $stmt = $conn->prepare(
                 "SELECT B.username AS nick, B.icon
-                FROM MusicaSala A
+                FROM UsuarioMusicaSala A
                 INNER JOIN Usuario B ON A.id_usuario = B.id_usuario
                 WHERE A.id_sala = :sala and id_musica is null");
 
@@ -639,8 +639,8 @@
         private function getMusicasArtista($conn, $idSala, $dias) {
             $stmt = $conn->prepare(
                 "SELECT id_musica, nota_calculada, 
-                (SELECT COUNT(*) FROM Avaliacao a WHERE a.id_musicasala = ms.id_musicasala) AS avaliacoes 
-                from MusicaSala ms where id_sala = :sala and id_musica is not null order by ordem_sala");
+                (SELECT COUNT(*) FROM Avaliacao a WHERE a.id_usuariomusicasala = ms.id_usuariomusicasala) AS avaliacoes 
+                from UsuarioMusicaSala ms where id_sala = :sala and id_musica is not null order by ordem_sala");
             $stmt->bindParam(':sala', $idSala);
             $stmt->execute();
 
@@ -661,13 +661,13 @@
         public function getSalaArtista($conn, $idSala, $idUsuario) {
             $stmt = $conn->prepare(
                 "SELECT
-                    MS.id_musicasala AS id_musica_sala,
+                    MS.id_usuariomusicasala AS id_musica_sala,
                     MS.id_musica AS musica,
                     CASE WHEN A.nota IS NULL THEN NULL ELSE MS.nota_calculada END AS avaliacao_media,
                     A.nota AS nota_usuario
                 FROM Sala AS S
-                INNER JOIN MusicaSala AS MS ON S.id_sala = MS.id_sala
-                LEFT JOIN Avaliacao AS A ON MS.id_musicasala = A.id_musicasala AND A.id_usuario = :usuario
+                INNER JOIN UsuarioMusicaSala AS MS ON S.id_sala = MS.id_sala
+                LEFT JOIN Avaliacao AS A ON MS.id_usuariomusicasala = A.id_usuariomusicasala AND A.id_usuario = :usuario
                 WHERE S.id_sala = :sala
                 AND dbo.datacorreta() > S.data_criacao + MS.ordem_sala - 1
                 ORDER BY MS.ordem_sala;
