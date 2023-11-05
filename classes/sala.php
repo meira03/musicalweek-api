@@ -184,6 +184,7 @@
                 "sala" => $result["sala"],
                 "tempo_restante" => $result["tempo_restante"],
                 "sala_finalizada" => $result["sala_finalizada"] == 1,
+                "ordem" => $result["ordem"]
             ];
         }
 
