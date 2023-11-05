@@ -116,8 +116,8 @@
 
     public function cadastra($conn) {
       $insert = $conn->prepare(
-      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, senha, tipo_plano) 
-      VALUES (:nome, :nick, :dataNasc, :email, :senha, 0)"
+      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, senha, tipo_plano, status) 
+      VALUES (:nome, :nick, :dataNasc, :email, :senha, 0, 0)"
       );
       
       $insert->bindParam(':nome', $this->nome);
@@ -147,8 +147,8 @@
 
     public function cadastraSpotify($conn) {
       $insert = $conn->prepare(
-      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, tipo_plano) 
-      VALUES (:nome, :nick, :dataNasc, :email, 0)"
+      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, tipo_plano, status) 
+      VALUES (:nome, :nick, :dataNasc, :email, 0, 0)"
       );
       
       $insert->bindParam(':nome', $this->nome);
@@ -451,6 +451,23 @@
       $stmt->execute();
     }
 
+    public function trocaIcone($conn, $idUsuario, $icon) {
+      $stmt = $conn->prepare("SELECT icon from Usuario WHERE id_usuario = :idUsuario");
+      $stmt->bindParam(":idUsuario", $idUsuario);
+
+      $stmt->execute();
+
+      if($stmt->fetchColumn() == $icon) return false;
+
+      $stmt = $conn->prepare("UPDATE Usuario SET icon = :icon WHERE id_usuario = :idUsuario");
+      $stmt->bindParam(":icon", $icon);
+      $stmt->bindParam(":idUsuario", $idUsuario);
+
+      $stmt->execute();
+
+      return true;
+    }
+    
     public function getUsername($conn, $idUsuario) {
       $query = "SELECT username FROM Usuario WHERE id_usuario = :idUsuario";
       $stmt = $conn->prepare($query);
