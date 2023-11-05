@@ -116,8 +116,8 @@
 
     public function cadastra($conn) {
       $insert = $conn->prepare(
-      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, senha, tipo_plano, status) 
-      VALUES (:nome, :nick, :dataNasc, :email, :senha, 0, 0)"
+      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, senha, icon, tipo_plano, status) 
+      VALUES (:nome, :nick, :dataNasc, :email, :senha, 'icone0.png', 0, 0)"
       );
       
       $insert->bindParam(':nome', $this->nome);
@@ -133,8 +133,8 @@
 
     public function cadastraGoogle($conn) {
       $insert = $conn->prepare(
-      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, tipo_plano, status) 
-      VALUES (:nome, :nick, :dataNasc, :email, 0, 1)"
+      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, icon, tipo_plano, status) 
+      VALUES (:nome, :nick, :dataNasc, :email, 'icone0.png', 0, 1)"
       );
       
       $insert->bindParam(':nome', $this->nome);
@@ -147,8 +147,8 @@
 
     public function cadastraSpotify($conn) {
       $insert = $conn->prepare(
-      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, tipo_plano, status) 
-      VALUES (:nome, :nick, :dataNasc, :email, 0, 0)"
+      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, icon, tipo_plano, status) 
+      VALUES (:nome, :nick, :dataNasc, :email, 'icone0.png', 0, 0)"
       );
       
       $insert->bindParam(':nome', $this->nome);
