@@ -307,11 +307,13 @@
                     join Sala S on M.id_sala = S.id_sala 
                     where M.id_sala = :sala
                     and s.data_criacao < DATEADD(day, -7, dbo.datacorreta()) 
-                    order by M.nota_calculada desc");
+                    order by M.nota_calculada desc
+                SELECT nota_calculada from Sala where id_sala = :salaid");
 
             $stmt->bindParam(':usuario', $idUsuario);
             $stmt->bindParam(':idsala', $idSala);
             $stmt->bindParam(':sala', $idSala);
+            $stmt->bindParam(':salaid', $idSala);
             $stmt->execute();
 
             $stmt->nextRowset();
@@ -323,12 +325,16 @@
             
             $stmt->nextRowset();
 
-            $final = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $musicas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            if($final == null) {
+            if($musicas == null) {
                 return array('codigo' => 3);
             } else {
-                return $final;
+                $stmt->nextRowset();
+                return array(
+                    "nota_sala" => $stmt->fetchColumn(), 
+                    "musicas" => $musicas
+                );
             }
         }
 
