@@ -27,15 +27,6 @@
             exit();
         }
 
-        if ($idArtista == 0) {
-            http_response_code(403);
-            echo json_encode(array(
-                "usuario" => false,
-                "descricao" => "Usuario não está na sala",
-            ), JSON_UNESCAPED_UNICODE);
-            exit();
-        }
-
         if ($idArtista == $idUsuario) {
             date_default_timezone_set('America/Sao_Paulo');
             echo json_encode($sala->getSalaArtistaTotal($conn, $_GET['id_sala'], $idUsuario));
