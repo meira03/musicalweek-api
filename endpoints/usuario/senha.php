@@ -26,7 +26,18 @@ if($vars['nova'] == $vars['senha']) {
 
 try {
 
-    if(!($usuario->verificaSenha($conn, $idUsuario, $vars['senha']))) {
+    $codigo = $usuario->verificaSenha($conn, $idUsuario, $vars['senha']);
+
+    if($codigo === 0) {
+        $response = array();
+        $response['login_social'] = true;
+        $response['descricao'] = "Login social não permite alteração de senha";
+        http_response_code(401);
+        echo json_encode($response);
+        exit();
+    }
+
+    if($codigo === 2) {
         $response = array();
         $response['senha'] = false;
         $response['descricao'] = "Senha errada";

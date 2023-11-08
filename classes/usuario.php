@@ -424,8 +424,16 @@
       $stmt = $conn->prepare($query);
       $stmt->bindParam(":idUsuario", $idUsuario);
       $stmt->execute();
-      
-      return hash('sha256', $senha) == $stmt->fetchColumn();
+
+      $hash = $stmt->fetchColumn();
+
+      if($hash === null) return 0;
+
+      if (hash('sha256', $senha) == $hash) {
+        return 1;
+      } else {
+        return 2;
+      }
     }
 
     public function novaSenha($conn, $idUsuario) {
@@ -497,7 +505,7 @@
       $perfil['nick'] = $perfil['username'];
       unset($perfil['username']); 
       
-      if ($perfil['status'] == null) {
+      if ($perfil['status'] == 0) {
         $perfil['confirmacao'] = false;
       } else {
         $perfil['confirmacao'] = true;
@@ -536,11 +544,106 @@
       $stmt->bindParam(':id', $idUsuario);
       $stmt->execute();
 
-      if ($stmt->fetchColumn() != null) {
+      if ($stmt->fetchColumn() != 0) {
         return true;
       } else {
         return false;
       }
+    }
+
+    public function getTodasSalas($conn, $idUsuario) {
+      $stmt = $conn->prepare(
+        "SELECT id_usuariomusicasala as id_musica_sala, id_musica, data_entrada as inicio_fila 
+        from UsuarioMusicaSala where status = 0 and id_usuario = :idusuario;
+
+        SELECT
+            S.id_sala,
+            S.nome,
+            (SELECT TOP 1 A.id_musica
+            FROM 
+                UsuarioMusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
+            WHERE 
+            dbo.datacorreta() < B.data_criacao + ordem_sala AND A.id_sala = MS.id_sala
+            ORDER BY 
+                A.ordem_sala) AS id_musica
+        FROM
+            UsuarioMusicaSala MS
+            INNER JOIN Sala S ON MS.id_sala = S.id_sala
+        WHERE
+            MS.id_usuario = :id and dbo.datacorreta() < DATEADD(DAY,8,S.data_criacao);
+            
+        SELECT s.id_sala, s.nome, u.username as nick, u.icon, 
+                (
+                    select case when exists 
+                    (select id_sala from UsuarioMusicaSala where id_sala = s.id_sala and id_usuario = :usuario)
+                        then 1
+                        else 0
+                    end
+                ) as participante,
+                (
+                    SELECT TOP 1 A.id_musica
+                        FROM 
+                        UsuarioMusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
+                        WHERE 
+                        dbo.datacorreta() < B.data_criacao + ordem_sala AND A.id_sala = s.id_sala
+                        ORDER BY 
+                        A.ordem_sala) as id_musica
+                        FROM sala s
+                        OUTER APPLY (
+                            SELECT TOP 1 mu.id_usuario
+                            FROM UsuarioMusicaSala mu
+                            WHERE mu.id_sala = s.id_sala AND mu.id_musica IS NOT NULL
+                        ) AS ms
+                        JOIN usuario u ON ms.id_usuario = u.id_usuario
+                        WHERE s.tipo_sala = 2
+                        AND s.data_criacao >= DATEADD(day, -8, dbo.datacorreta()
+                );
+        EXEC SP_RETORNAHISTORICO :usuarioid, 1;
+      ");
+      $stmt->bindParam(':idusuario', $idUsuario);
+      $stmt->bindParam(':id', $idUsuario);
+      $stmt->bindParam(':usuario', $idUsuario);
+      $stmt->bindParam(':usuarioid', $idUsuario);
+      $stmt->execute();
+
+      $filas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      $stmt->nextRowset();
+      $salas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      $stmt->nextRowset();
+      $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      $stmt->nextRowset();
+
+      $salasArtista = [];
+      $recomendacoes = [];
+
+      foreach ($resultado as $row) {
+          $entry = [
+              "id_sala_artista" => $row["id_sala"],
+              "artista" => [
+                  "icon" => $row["icon"],
+                  "nick" => $row["nick"]
+              ],
+              "id_musica" => $row["id_musica"]
+          ];
+
+          if ($row["participante"] == 1) {
+              $salasArtista[] = $entry;
+          } else {
+              $recomendacoes[] = $entry;
+          }
+      }
+
+      $stmt->nextRowset();
+      $historico = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+      return [
+        'filas' => $filas,
+        'salas' => $salas,
+        'salas_artista' => $salasArtista,
+        'minhas_salas' => $minhasSalas,
+        'historico' => $historico,
+        'recomendacoes' => $recomendacoes
+      ];
     }
 
     public function getFila($conn, $idUsuario) {

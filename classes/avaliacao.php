@@ -29,10 +29,40 @@
         }
 
         public function topMusicas($conn) {
-            $select =  $conn->prepare("SELECT top 10 id_musica from UsuarioMusicaSala");
+            $select =  $conn->prepare("SELECT top 21 id_musica, nota, periodo from Classificacao order by data_carga desc");
             $select->execute();
 
-            return array_column($select->fetchAll(PDO::FETCH_ASSOC), 'id_musica');
+            $periodo0 = [];
+            $periodo1 = [];
+            $periodo2 = [];
+
+            foreach ($select as $row) {
+                if ($row[2] == 0) {
+                    $periodo0[] = ["id_musica" => $row[0], "nota" => $row[1]];
+                } elseif ($row[2] == 1) {
+                    $periodo1[] = ["id_musica" => $row[0], "nota" => $row[1]];
+                } elseif ($row[2] == 2) {
+                    $periodo2[] = ["id_musica" => $row[0], "nota" => $row[1]];
+                }
+            }
+
+            usort($periodo0, function ($a, $b) {
+                return $b["nota"] <=> $a["nota"];
+            });
+
+            usort($periodo1, function ($a, $b) {
+                return $b["nota"] <=> $a["nota"];
+            });
+
+            usort($periodo2, function ($a, $b) {
+                return $b["nota"] <=> $a["nota"];
+            });
+
+            return [
+                array_column(array_slice($periodo0, 0, 7), 'id_musica'),
+                array_column(array_slice($periodo1, 0, 7), 'id_musica'),
+                array_column(array_slice($periodo2, 0, 7), 'id_musica')
+            ];
         }
     }
 ?>

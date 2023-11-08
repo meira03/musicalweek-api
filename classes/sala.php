@@ -52,7 +52,7 @@
 
         public function insereFila($conn, $idUsuario, $idMusica) {
             $insert = $conn->prepare(
-                "INSERT INTO [dbo].[MusicaSala] (id_usuario, id_musica, data_entrada, status) 
+                "INSERT INTO [dbo].[UsuarioMusicaSala] (id_usuario, id_musica, data_entrada, status) 
                 VALUES (:usuario, :musica, dbo.datacorreta(), 0);"
             );
 
@@ -649,9 +649,11 @@
             $stmt = $conn->prepare(
                 "UPDATE UsuarioMusicaSala
                 SET status = 2, data_saida = dbo.datacorreta()
-                WHERE id_usuario = :usuario AND id_sala = :sala AND id_musica is null;");
+                WHERE id_usuario = :usuario AND id_sala = :sala AND id_musica is null;
+                update Sala set qtd_usuarios = qtd_usuarios - 1 where id_sala = :idsala");
             $stmt->bindParam(':sala', $sala);
             $stmt->bindParam(':usuario', $idUsuario);
+            $stmt->bindParam(':idsala', $sala);
 
             $stmt->execute();
 
@@ -733,8 +735,8 @@
         }
 
         public function getSalaArtista($conn, $idSala, $idUsuario) {
-            $stmt = $conn->prepare("EXEC SP_INFO_SALA_ARTISTA :sala");
-            //$stmt->bindParam(':usuario', $idUsuario);
+            $stmt = $conn->prepare("EXEC SP_INFO_SALA_ARTISTA :sala, :usuario");
+            $stmt->bindParam(':usuario', $idUsuario);
             $stmt->bindParam(':sala', $idSala);
             $stmt->execute();
 
