@@ -116,7 +116,7 @@
 
     public function cadastra($conn) {
       $insert = $conn->prepare(
-      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, senha, icon, dt_cadastro, tipo_plano, status) 
+      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, senha, icon, data_cadastro, tipo_plano, status) 
       VALUES (:nome, :nick, :dataNasc, :email, :senha, 'icone0.png', dbo.datacorreta(), 0, 0)"
       );
       
@@ -133,7 +133,7 @@
 
     public function cadastraGoogle($conn) {
       $insert = $conn->prepare(
-      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, icon, dt_cadastro, tipo_plano, status) 
+      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, icon, data_cadastro, tipo_plano, status) 
       VALUES (:nome, :nick, :dataNasc, :email, 'icone0.png', dbo.datacorreta(), 0, 1)"
       );
       
@@ -147,7 +147,7 @@
 
     public function cadastraSpotify($conn) {
       $insert = $conn->prepare(
-      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, icon, dt_cadastro, tipo_plano, status) 
+      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, icon, data_cadastro, tipo_plano, status) 
       VALUES (:nome, :nick, :dataNasc, :email, 'icone0.png', dbo.datacorreta(), 0, 0)"
       );
       
@@ -525,7 +525,7 @@
           email = null, 
           senha = null, 
           tipo_plano = null,
-          dt_exclusao =  dbo.datacorreta(),
+          data_exclusao =  dbo.datacorreta(),
           status = 2 
         WHERE id_usuario = :id and (status <> 2 OR status IS NULL)";
       $stmt = $conn->prepare($query);
