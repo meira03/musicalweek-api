@@ -16,7 +16,7 @@
     }
 
     public function validarNome() {
-      if (mb_strlen($this->nome) < 257 && $this->nome != null) {
+      if (mb_strlen($this->nome) < 65 && $this->nome != null) {
         return true; 
       } else {
         return false; 
@@ -116,8 +116,8 @@
 
     public function cadastra($conn) {
       $insert = $conn->prepare(
-      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, senha, icon, tipo_plano, status) 
-      VALUES (:nome, :nick, :dataNasc, :email, :senha, 'icone0.png', 0, 0)"
+      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, senha, icon, dt_cadastro, tipo_plano, status) 
+      VALUES (:nome, :nick, :dataNasc, :email, :senha, 'icone0.png', dbo.datacorreta(), 0, 0)"
       );
       
       $insert->bindParam(':nome', $this->nome);
@@ -133,8 +133,8 @@
 
     public function cadastraGoogle($conn) {
       $insert = $conn->prepare(
-      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, icon, tipo_plano, status) 
-      VALUES (:nome, :nick, :dataNasc, :email, 'icone0.png', 0, 1)"
+      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, icon, dt_cadastro, tipo_plano, status) 
+      VALUES (:nome, :nick, :dataNasc, :email, 'icone0.png', dbo.datacorreta(), 0, 1)"
       );
       
       $insert->bindParam(':nome', $this->nome);
@@ -147,8 +147,8 @@
 
     public function cadastraSpotify($conn) {
       $insert = $conn->prepare(
-      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, icon, tipo_plano, status) 
-      VALUES (:nome, :nick, :dataNasc, :email, 'icone0.png', 0, 0)"
+      "INSERT INTO [dbo].[Usuario] (nome, username, data_nasc, email, icon, dt_cadastro, tipo_plano, status) 
+      VALUES (:nome, :nick, :dataNasc, :email, 'icone0.png', dbo.datacorreta(), 0, 0)"
       );
       
       $insert->bindParam(':nome', $this->nome);
@@ -524,7 +524,8 @@
           data_nasc = null, 
           email = null, 
           senha = null, 
-          tipo_plano = null, 
+          tipo_plano = null,
+          dt_exclusao =  dbo.datacorreta(),
           status = 2 
         WHERE id_usuario = :id and (status <> 2 OR status IS NULL)";
       $stmt = $conn->prepare($query);

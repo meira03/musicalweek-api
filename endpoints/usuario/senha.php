@@ -32,7 +32,7 @@ try {
         $response = array();
         $response['login_social'] = true;
         $response['descricao'] = "Login social não permite alteração de senha";
-        http_response_code(401);
+        http_response_code(403);
         echo json_encode($response);
         exit();
     }
