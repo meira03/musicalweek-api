@@ -556,21 +556,7 @@
         "SELECT id_usuariomusicasala as id_musica_sala, id_musica, data_entrada as inicio_fila 
         from UsuarioMusicaSala where status = 0 and id_usuario = :idusuario;
 
-        SELECT
-            S.id_sala,
-            S.nome,
-            (SELECT TOP 1 A.id_musica
-            FROM 
-                UsuarioMusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
-            WHERE 
-            dbo.datacorreta() < B.data_criacao + ordem_sala AND A.id_sala = MS.id_sala
-            ORDER BY 
-                A.ordem_sala) AS id_musica
-        FROM
-            UsuarioMusicaSala MS
-            INNER JOIN Sala S ON MS.id_sala = S.id_sala
-        WHERE
-            MS.id_usuario = :id and dbo.datacorreta() < DATEADD(DAY,8,S.data_criacao);
+        EXEC SP_RETORNA_SALAS_ATIVAS :id;
             
         SELECT s.id_sala, s.nome, u.username as nick, u.icon, 
                 (
