@@ -522,15 +522,15 @@
         public function salasArtistasAtivas($conn) {
             $stmt = $conn->prepare(
                 "SELECT s.id_sala, s.nome, u.username as nick, u.icon,
-                (
+                isnull((
                     SELECT TOP 1 A.id_musica
                         FROM 
                         UsuarioMusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
                         WHERE 
                         dbo.datacorreta() < B.data_criacao + ordem_sala AND A.id_sala = s.id_sala
                         ORDER BY 
-                        A.ordem_sala
-                ) as id_musica
+                        A.ordem_sala), (select top 1 id_musica from UsuarioMusicaSala C 
+						where C.id_sala = S.id_sala order by ordem_sala desc)) as id_musica
                     FROM sala s
                     OUTER APPLY (
                         SELECT TOP 1 mu.id_usuario
@@ -539,7 +539,7 @@
                     ) AS ms
                     JOIN usuario u ON ms.id_usuario = u.id_usuario
                     WHERE s.tipo_sala = 2
-                    AND s.data_criacao >= DATEADD(day, -7, dbo.datacorreta());");
+                    AND s.data_criacao >= DATEADD(day, -8, dbo.datacorreta());");
 
             $stmt->execute();
 
@@ -556,14 +556,14 @@
                         else 0
                     end
                 ) as participante,
-                (
+                isnull((
                     SELECT TOP 1 A.id_musica
                         FROM 
                         UsuarioMusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
                         WHERE 
                         dbo.datacorreta() < B.data_criacao + ordem_sala AND A.id_sala = s.id_sala
                         ORDER BY 
-                        A.ordem_sala) as id_musica
+                        A.ordem_sala), (select top 1 id_musica from UsuarioMusicaSala C where C.id_sala = S.id_sala order by ordem_sala desc)) as id_musica
                         FROM sala s
                         OUTER APPLY (
                             SELECT TOP 1 mu.id_usuario
@@ -572,7 +572,7 @@
                         ) AS ms
                         JOIN usuario u ON ms.id_usuario = u.id_usuario
                         WHERE s.tipo_sala = 2
-                        AND s.data_criacao >= DATEADD(day, -7, dbo.datacorreta()
+                        AND s.data_criacao >= DATEADD(day, -8, dbo.datacorreta()
                 );");
             $stmt->bindParam(':usuario', $idUsuario);
             $stmt->execute();
@@ -619,7 +619,7 @@
                     s.tipo_sala,
                     u.id_usuario,
                     s.data_criacao,
-                    DATEADD(day, -7, dbo.datacorreta()) AS verificacao,
+                    DATEADD(day, -8, dbo.datacorreta()) AS verificacao,
                     (
                         SELECT TOP 1 status
                         FROM UsuarioMusicaSala

@@ -22,6 +22,7 @@
         $response = array();
         $response['id_musica_sala'] = false;
         $response['descricao'] = "Id da musica sala deve ser é inteiro, e não " . gettype($vars['id_musica_sala']);
+        http_response_code(400);
         echo json_encode($response);
         exit();
     }
@@ -67,7 +68,20 @@
                 "erro" => "Usuario não esta na sala"
             ), JSON_UNESCAPED_UNICODE);
             exit();
-        } else {
+        } elseif ($codigo == 3) {
+            http_response_code(403);
+            echo json_encode(array(
+                "finalizada" => true,
+                "erro" => "Sala já acabou"
+            ), JSON_UNESCAPED_UNICODE);
+            exit();
+        } elseif ($codigo == 4) {
+            http_response_code(409);
+            echo json_encode(array(
+                "disponivel" => false,
+                "erro" => "Música ainda nao disponível para avaliação",
+            ), JSON_UNESCAPED_UNICODE);
+        } elseif ($codigo == 0) {
             http_response_code(409);
             echo json_encode(array(
                 "id_musica_sala" => false,

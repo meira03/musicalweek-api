@@ -585,12 +585,16 @@
                         WHERE s.tipo_sala = 2
                         AND s.data_criacao >= DATEADD(day, -8, dbo.datacorreta()
                 );
+
         EXEC SP_RETORNAHISTORICO :usuarioid, 1;
+
+        EXEC SP_MINHAS_SALAS_ARTISTA :idusuarioid;
       ");
       $stmt->bindParam(':idusuario', $idUsuario);
       $stmt->bindParam(':id', $idUsuario);
       $stmt->bindParam(':usuario', $idUsuario);
       $stmt->bindParam(':usuarioid', $idUsuario);
+      $stmt->bindParam(':idusuarioid', $idUsuario);
       $stmt->execute();
 
       $filas = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -622,6 +626,12 @@
 
       $stmt->nextRowset();
       $historico = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      $stmt->nextRowset();
+      $minhasSalas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      
+      foreach ($minhasSalas as &$row) {
+        $row['ativa'] = $row['ativa'] == 1;
+      }
 
       return [
         'filas' => $filas,
