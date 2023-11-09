@@ -18,7 +18,7 @@
 
         $idArtista = $sala->getArtista($conn, $_GET['id_sala'], $idUsuario);
 
-        if ($idArtista === null) {
+        if ($idArtista == null) {
             http_response_code(404);
             echo json_encode(array(
                 "id_sala" => false,

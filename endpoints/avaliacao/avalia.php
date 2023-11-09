@@ -76,7 +76,7 @@
             ), JSON_UNESCAPED_UNICODE);
             exit();
         } elseif ($codigo == 4) {
-            http_response_code(409);
+            http_response_code(403);
             echo json_encode(array(
                 "disponivel" => false,
                 "erro" => "Música ainda nao disponível para avaliação",
