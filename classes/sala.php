@@ -51,7 +51,7 @@
         }
 
         public function insereFila($conn, $idUsuario, $idMusica) {
-            $insert = $conn->prepare("SP_INSERE_FILA :usuario, :musica, dbo.datacorreta(), 0");
+            $insert = $conn->prepare("SP_INSERE_FILA :usuario, :musica, 0");
 
             $insert->bindParam(':usuario', $idUsuario);
             $insert->bindParam(':musica', $idMusica);
