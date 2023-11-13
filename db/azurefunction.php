@@ -17,8 +17,7 @@
             "sucesso" => true,
         ), JSON_UNESCAPED_UNICODE);
         exit;
-    }
-    catch (PDOException $e) {
+    } catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(array(
             "erro" => $ex->getMessage(),
