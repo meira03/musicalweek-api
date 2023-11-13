@@ -10,7 +10,7 @@
     require_once("dbconexao.php");
     
     try {
-        $stmt = $conn->prepare("INSERT_AZURE_FUNCTION");
+        $stmt = $conn->prepare("SP_CARGA_TOPS");
         $stmt->execute();
         http_response_code(200);
         echo json_encode(array(
