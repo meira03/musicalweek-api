@@ -636,6 +636,10 @@
         $row['ativa'] = $row['ativa'] == 1;
       }
 
+      foreach ($salas as &$sala) {
+        $sala['sala_finalizada'] = $sala['sala_finalizada'] == 1;
+      }
+
       return [
         'filas' => $filas,
         'salas' => $salas,
