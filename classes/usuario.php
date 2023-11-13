@@ -559,7 +559,7 @@
 
         EXEC SP_RETORNA_SALAS_ATIVAS :id;
             
-        SELECT s.id_sala, s.nome, u.username as nick, u.icon, 
+        SELECT s.id_sala, s.nome, u.username as nick, u.id_usuario, u.icon, 
                 (
                     select case when exists 
                     (select id_sala from UsuarioMusicaSala where id_sala = s.id_sala and id_usuario = :usuario)
@@ -618,6 +618,9 @@
           ];
 
           if ($row["participante"] == 1) {
+              if($row["id_usuario"] == $idUsuario) {
+                continue;
+              }
               $salasArtista[] = $entry;
           } else {
               $recomendacoes[] = $entry;
