@@ -20,7 +20,16 @@ if (!isset($vars['email'])) {
 
 $email = $vars['email'];
 $usuario = new Usuario('','','',$email,'');
-$idUsuario = $usuario->getid($conn);
+
+try {
+	$idUsuario = $usuario->getid($conn);
+} catch (PDOException $e) {
+	http_response_code(500);
+	echo json_encode(array(
+		"erro" => $ex->getMessage(),
+	), JSON_UNESCAPED_UNICODE);
+	exit;
+}
 
 if ($idUsuario == null) {
 	http_response_code(401);
@@ -37,8 +46,15 @@ for ($i = 0; $i < 40; $i++) {
 	$codigo .= $caractere;
 }
 
-$usuario->insertCodigoSenha($conn, $idUsuario, $codigo);
-
+try {
+	$usuario->insertCodigoSenha($conn, $idUsuario, $codigo);
+} catch (PDOException $e) {
+	http_response_code(500);
+	echo json_encode(array(
+		"erro" => $ex->getMessage(),
+	), JSON_UNESCAPED_UNICODE);
+	exit;
+}
 try {
     $mail = new PHPMailer(true);
 
@@ -54,9 +70,27 @@ try {
 	$mail->addAddress($usuario->getEmail());
 
 	$mail->isHTML(true);
-	$mail->Subject = 'Troque sua senha'; 
-	$mail->Body = 'Clique para trocar senha <a href="http://localhost:3000/pt/esqueci-senha/' . $codigo . '"> Trocar Senha </a>';
-	$mail->AltBody = 'Clique no link para trocar senha: http://localhost:3000/pt/esqueci-senha/' . $codigo;
+    $mail->CharSet = 'UTF-8';
+	$mail->Subject = 'Recuperação de senha'; 
+	$mail->Body = 
+    '<div style="max-width: 600px; margin: 0 auto; background-color: black; padding: 20px; text-align: center; border-radius: 10px; box-shadow: 0 0 10px #14defa; font-family: \'Arial\', \'Helvetica\', sans-serif;">
+        <h1 style="color: #14defa; text-transform: uppercase;">TROQUE SUA SENHA</h1>
+
+        <div style="border-top: 2px solid #14defa; padding-top: 10px;"></div>
+
+        <p style="color: white;">Recebemos um pedido para redefinir sua senha.</p>
+        <p style="color: white;">Caso não deseje mudar a sua senha, você pode ignorar este e-mail.</p>
+        <p style="color: white;">Clique no botão abaixo caso queira trocar sua senha:</p>
+
+        <button style="background-color: #14defa; color: white; font-weight: bold; padding: 10px 0; border: none; cursor: pointer; width: 100%;">
+            <a href="https://musicalweek.azurewebsites.net/pt/esqueci-senha/' . $codigo . '" style="color: white; text-decoration: none; display: block;">REDEFINIR SENHA</a>
+        </button>
+
+        <div style="margin-top: 20px; border-top: 2px solid #14defa; padding-top: 10px;">
+            <p style="color: white;">Este e-mail está sendo enviado por MusicalWeek</p>
+        </div>
+    </div>';
+	$mail->AltBody = 'Clique no link para trocar senha: https://musicalweek.azurewebsites.net/pt/esqueci-senha/' . $codigo;
 
 	if($mail->send()) {
         http_response_code(200);

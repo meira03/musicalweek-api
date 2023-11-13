@@ -42,9 +42,26 @@ try {
 	$mail->addAddress($usuario->getEmail());
 
 	$mail->isHTML(true);
-	$mail->Subject = 'Confirme o seu Email'; 
-	$mail->Body = 'Seu código de confirmação de email é: <strong> ' . $codigo . '<strong>';
-	$mail->AltBody = 'Seu código de confirmação de email é: ' . $codigo;
+	$mail->CharSet = 'UTF-8';
+	$mail->Subject = 'Confirmação de Email'; 
+	$mail->Body = 
+	'<div style="max-width: 600px; margin: 0 auto; background-color: black; padding: 20px; text-align: center; border-radius: 10px; box-shadow: 0 0 10px #14defa; font-family: \'Arial\', \'Helvetica\', sans-serif;">
+		<h1 style="color: #14defa; text-transform: uppercase;">CONFIRMAÇÃO DE E-MAIL</h1>
+
+		<div style="border-top: 2px solid #14defa; padding-top: 10px;"></div>
+
+		<p style="color: white;">Seu email foi cadastrado no site MusicalWeek!</p>
+		<p style="color: white;">Confirme seu email para poder receber notificações quando uma sala começar</p>
+
+		<button style="background-color: #14defa; color: white; font-weight: bold; padding: 10px 0; border: none; cursor: pointer; width: 100%;">
+			<a href="https://musicalweek.azurewebsites.net/pt/confirmaEmail/' . $codigo . '" style="color: white; text-decoration: none; display: block;">CONFIRMAR E-MAIL</a>
+		</button>
+
+		<div style="margin-top: 20px; border-top: 2px solid #14defa; padding-top: 10px;">
+			<p style="color: white;">Este e-mail está sendo enviado por MusicalWeek</p>
+		</div>
+	</div>';
+	$mail->AltBody = 'Clique no link para confirmar email: https://musicalweek.azurewebsites.net/pt/confirmaEmail/' . $codigo;
 
 	if($mail->send()) {
         http_response_code(200);
