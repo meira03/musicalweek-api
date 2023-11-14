@@ -518,7 +518,7 @@
         SELECT s.id_sala, s.nome, u.username as nick, u.id_usuario, u.icon, 
                 (
                     select case when exists 
-                    (select id_sala from UsuarioMusicaSala where id_sala = s.id_sala and id_usuario = :usuario)
+                    (select id_sala from UsuarioMusicaSala where id_sala = s.id_sala and id_usuario = :usuario and status = 1)
                         then 1
                         else 0
                     end
