@@ -81,36 +81,6 @@
             return $stmt->fetch(PDO::FETCH_ASSOC);
         }
 
-        // public function buscaSalas($conn, $idUsuario) {
-        //     $query = 
-        //     "SELECT
-        //     MS.id_usuariomusicasala AS id_musica_sala,
-        //     S.nome AS nome_sala,
-        //     isnull((SELECT TOP 1 A.id_musica
-        //      FROM 
-        //         UsuarioMusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
-        //      WHERE 
-        //      :dataatual < B.data_criacao + ordem_sala AND A.id_sala = MS.id_sala
-        //      ORDER BY 
-        //         A.ordem_sala),(select TOP 1 A.id_musica
-        //      FROM 
-        //         UsuarioMusicaSala A WHERE 
-        //         A.id_usuariomusicasala = MS.id_usuariomusicasala)) AS id_musica
-        // FROM
-        //     UsuarioMusicaSala MS
-        //     LEFT JOIN Sala S ON MS.id_sala = S.id_sala
-        // WHERE
-        //     MS.id_usuario = :id_usuario and
-        //     S.tipo_sala = 1";
-        //     $stmt = $conn->prepare($query);
-        //     $stmt->bindParam(':id_usuario', $idUsuario);
-        //     $stmt->bindParam(':dataatual', $dataAtual);
-        //     $dataAtual = date("Y-m-d H:i:s");
-        //     $stmt->execute();
-
-        //     return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        // }
-        
         public function verifica($conn, $idMusicaSala) {
             $stmt = $conn->prepare('SELECT id_sala, id_usuario, id_musica, data_entrada FROM UsuarioMusicaSala WHERE id_usuariomusicasala = :id_musicasala;
             EXEC SP_ESTIMA_TEMPO');
@@ -128,35 +98,6 @@
                 "tempo_estimado" => $stmt->fetchColumn()
             ];
         }
-
-        // public function getFila($conn, $idMusicaSala) {
-        //     $stmt = $conn->prepare(
-        //         'SELECT MS.id_sala AS sala, MS.id_musica AS musica
-        //         FROM UsuarioMusicaSala MS
-        //         WHERE MS.id_usuariomusicasala = :id_musicasala;');
-        //     $stmt->bindParam(':id_musicasala', $idMusicaSala);
-        //     $stmt->execute();
-            
-        //     return $stmt->fetch(PDO::FETCH_ASSOC); 
-        // }
-
-        // public function getInfo($conn, $idMusicaSala, $idSala, $idUsuario) {
-        //     $stmt = $conn->prepare('SP_STATUS_SALA :idmusicasala');
-        //     $stmt->bindParam(':idmusicasala', $idMusicaSala);
-        //     $stmt->execute();
-
-        //     $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        //     if ($result["tipo_sala"] != 1) return ["tipo_sala" => $result["tipo_sala"]];
-
-        //     return [
-        //         "sala" => $result["sala"],
-        //         "tempo_restante" => $result["tempo_restante"],
-        //         "sala_finalizada" => $result["sala_finalizada"] == 1,
-        //         "participantes" => $this->getParticipantes($conn, $idSala),
-        //         "musicas" => $this->getMusicas($conn, $idUsuario, $idSala)
-        //     ];
-        // }
 
         public function getSala($conn, $idSala, $idUsuario) {
             $stmt = $conn->prepare(
@@ -184,21 +125,6 @@
                 "ordem" => $result["ordem"]
             ];
         }
-
-        // private function getParticipantes($conn, $idSala) {
-        //     $stmt = $conn->prepare(
-        //         "SELECT B.username AS nick, B.icon
-        //         FROM UsuarioMusicaSala A
-        //         INNER JOIN Usuario B ON A.id_usuario = B.id_usuario
-        //         WHERE A.id_sala = :sala");
-
-        //     $stmt->bindParam(':sala', $idSala);
-        //     $stmt->execute();
-
-        //     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-        //     return $result;
-        // }
 
         public function participantes($conn, $idSala, $idUsuario) {
             $stmt = $conn->prepare(
@@ -415,107 +341,6 @@
             }
         }
 
-        // private function getMusicas($conn, $idUsuario, $idSala) {
-        //     $stmt = $conn->prepare(
-        //         "SELECT B.id_usuariomusicasala from Sala A
-        //         INNER JOIN UsuarioMusicaSala B on A.id_sala = B.id_sala
-        //         where B.id_sala = :sala order by ordem_sala");
-        //     $stmt->bindParam(':sala', $idSala);
-        //     $stmt->execute();
-
-        //     $idsMusicaSala = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        //     $stmt = $conn->prepare(
-        //         "SELECT top 1 A.id_usuariomusicasala from UsuarioMusicaSala A
-        //         INNER JOIN Sala B on A.id_sala = B.id_sala
-        //         where dbo.datacorreta() < B.data_criacao + ordem_sala
-        //         and A.id_sala = :sala order by ordem_sala");
-        //     $stmt->bindParam(':sala', $idSala);
-        //     $stmt->execute();
-
-        //     $musicaAtual = $stmt->fetch(PDO::FETCH_COLUMN);
-
-        //     $musicas = array();
-
-        //     foreach ($idsMusicaSala as $row) {
-        //         $musicaId = $row['id_musicasala'];
-        //         $stmt = $conn->prepare(
-        //             "SELECT A.id_musica, A.nota_calculada, B.nota from UsuarioMusicaSala A
-        //             LEFT JOIN Avaliacao B ON A.id_usuariomusicasala = B.id_usuariomusicasala 
-        //             AND B.id_usuario = :usuario
-        //             where A.id_usuariomusicasala = :musicaid");
-        //         $stmt->bindParam(':usuario', $idUsuario);
-        //         $stmt->bindParam(':musicaid', $musicaId);
-
-        //         $stmt->execute();
-
-        //         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        //         array_push($musicas, [
-        //             "id_musica_sala" => $musicaId,
-        //             "musica" => $result["id_musica"],
-        //             "avaliacao_media" =>  $result["nota_calculada"],
-        //             "nota_usuario" => $result["nota"],
-        //             "avaliacoes" => $this->getAvaliacoes($conn, $musicaId, $idSala)
-        //         ]);
-
-        //         if ($musicaAtual == $musicaId) break;
-        //     }
-
-        //     return $musicas;
-        // }
-
-        // private function getMedia($conn, $musicaId) {
-        //     $Avaliacoes = $this->getAvaliacoes($conn, $musicaId);
-
-        //     if ($Avaliacoes == null) {
-        //         return null;
-        //     }
-
-        //     $total = 0;
-        //     $soma = 0;
-
-        //     foreach ($Avaliacoes as $Avaliacao) {
-        //         $soma += $Avaliacao['nota'];
-        //         $total++;
-        //     }
-
-        //     return round($soma / $total, 2);
-        // }
-
-        // private function getAvaliacoes($conn, $musicaId, $idSala) {
-        //     $stmt = $conn->prepare(
-        //         "SELECT U.username AS nick, A.nota
-        //         FROM UsuarioMusicaSala MS
-        //         LEFT JOIN Avaliacao A ON MS.id_usuariomusicasala = A.id_usuariomusicasala
-        //         LEFT JOIN Usuario U ON A.id_usuario = U.id_usuario
-        //         WHERE MS.id_musica = (select id_musica from UsuarioMusicaSala where id_usuariomusicasala = :musicaid)
-        //         and MS.id_sala = :sala");
-        //     $stmt->bindParam(':musicaid', $musicaId);
-        //     $stmt->bindParam(':sala', $idSala);
-
-        //     $stmt->execute();
-
-        //     $resposta = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        //     if(empty($resposta) || $resposta[0]['nick'] == null) {
-        //         return null;
-        //     } else {
-        //         return $resposta;
-        //     }
-        // }
-
-        // public function selectIdMusicaSala($conn, $sala, $idUsuario) {
-        //     $stmt = $conn->prepare(
-        //         "SELECT id_usuariomusicasala from UsuarioMusicaSala where id_usuario = :usuario and id_sala = :sala");
-        //     $stmt->bindParam(':usuario', $idUsuario);
-        //     $stmt->bindParam(':sala', $sala);
-
-        //     $stmt->execute();
-
-        //     return $stmt->fetchColumn();
-        // }
-
         public function salasArtistasAtivas($conn) {
             $stmt = $conn->prepare(
                 "SELECT s.id_sala, s.nome, u.username as nick, u.icon,
@@ -685,28 +510,8 @@
                 "sala_finalizada" => $result["sala_finalizada"] == 1,
                 "usuarios" => $result["qtd_usuarios"],
                 "avaliacoes" => $result["qtd_avaliacoes"],
-                //"participantes" => $this->getParticipantesArtista($conn, $idSala),
                 "musicas" => $this->getMusicasArtista($conn, $idSala, (new DateTime())->diff(new DateTime($result["data_criacao"]))->days)
             ];
-        }
-
-        private function getParticipantesArtista($conn, $idSala) {
-            $stmt = $conn->prepare(
-                "SELECT B.username AS nick, B.icon
-                FROM UsuarioMusicaSala A
-                INNER JOIN Usuario B ON A.id_usuario = B.id_usuario
-                WHERE A.id_sala = :sala and id_musica is null");
-
-            $stmt->bindParam(':sala', $idSala);
-            $stmt->execute();
-
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            foreach ($result as $key => $row) {
-                $result[$key]['icon'] = str_replace(' ', '', $row['icon']);
-            }
-            
-            return $result;
         }
 
         private function getMusicasArtista($conn, $idSala, $dias) {
