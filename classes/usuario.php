@@ -190,26 +190,6 @@
       $idUsuario = $stmt->fetchColumn();
       return $idUsuario;
     }
-
-    public function select($conn, $idUsuario) {
-      $query = "SELECT nome, email, username, data_nasc FROM [dbo].[Usuario] WHERE id_usuario = :id";
-      $stmt = $conn->prepare($query);
-      $stmt->bindParam(':id', $idUsuario);
-      $stmt->execute();
-
-      if ($stmt->rowCount() == 0) {
-        return false;
-      }
-
-      $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-      $this->nome = $row['nome'];
-      $this->email = $row['email'];
-      $this->nick = $row['username'];
-      $this->dataNasc = $row['data_nasc'];
-
-      return true;
-    }
     
     public function selectEmail($conn, $idUsuario) {
       $query = "SELECT email FROM [dbo].[Usuario] WHERE id_usuario = :id";
@@ -226,15 +206,6 @@
       $this->email = $row['email'];
 
       return true;
-    }
-
-    public function selectNick($conn) {
-      $query = "SELECT username FROM [dbo].[Usuario] WHERE email = :email";
-      $stmt = $conn->prepare($query);
-      $stmt->bindParam(":email", $this->email);
-      $stmt->execute();
-      $idUsuario = $stmt->fetchColumn();
-      return $idUsuario;
     }
 
     public function insertCodigo($conn, $idUsuario, $codigo) {
@@ -374,21 +345,6 @@
       $stmt = $conn->prepare($query);
       $stmt->bindParam(':id', $idUsuario);
       $stmt->execute();
-    }
-
-    public function getPlano($conn, $idUsuario) {
-      $query = "SELECT tipo_plano FROM [dbo].[Usuario] WHERE id_usuario = :id";
-      $stmt = $conn->prepare($query);
-      $stmt->bindParam(':id', $idUsuario);
-      $stmt->execute();
-
-      if ($stmt->rowCount() == 0) {
-        return false;
-      }
-
-      $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-      return $row['tipo_plano'];
     }
 
     private function getEmailCensurado($email) {
@@ -648,56 +604,6 @@
         'historico' => $historico,
         'recomendacoes' => $recomendacoes
       ];
-    }
-
-    public function getFila($conn, $idUsuario) {
-      $query = "SELECT id_usuariomusicasala, id_musica from UsuarioMusicaSala where status = 0 and id_usuario = :id";
-      $stmt = $conn->prepare($query);
-      $stmt->bindParam(':id', $idUsuario);
-      $stmt->execute();
-
-      return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function getSalas($conn, $idUsuario) {
-      $query = 
-        "SELECT
-            S.id_sala,
-            S.nome,
-            (SELECT TOP 1 A.id_musica
-            FROM 
-                UsuarioMusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
-            WHERE 
-            dbo.datacorreta() < B.data_criacao + ordem_sala AND A.id_sala = MS.id_sala
-            ORDER BY 
-                A.ordem_sala) AS id_musica
-        FROM
-            UsuarioMusicaSala MS
-            INNER JOIN Sala S ON MS.id_sala = S.id_sala
-        WHERE
-            MS.id_usuario = :id and dbo.datacorreta() < DATEADD(DAY,7,S.data_criacao)";
-      $stmt = $conn->prepare($query);
-      $stmt->bindParam(':id', $idUsuario);
-      $stmt->execute();
-
-      return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function getHistorico($conn, $idUsuario) {
-      $stmt = $conn->prepare("declare @i int;
-        EXEC SP_RETORNAHISTORICO :id, @i output;
-        select @i;");
-      $stmt->bindParam(':id', $idUsuario);
-      $stmt->execute();
-
-      $stmt->nextRowset();
-      $salas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-      $stmt->nextRowset();
-
-      return array(
-        "total" => $stmt->fetchColumn(),
-        "salas" => $salas
-      );
     }
 
     public function getNome() {
