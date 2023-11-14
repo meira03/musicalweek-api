@@ -523,14 +523,16 @@
                         else 0
                     end
                 ) as participante,
-                (
+                S.id_sala,
+                isnull((
                     SELECT TOP 1 A.id_musica
                         FROM 
                         UsuarioMusicaSala A INNER JOIN Sala B ON A.id_sala = B.id_sala
                         WHERE 
                         dbo.datacorreta() < B.data_criacao + ordem_sala AND A.id_sala = s.id_sala
                         ORDER BY 
-                        A.ordem_sala) as id_musica
+                        A.ordem_sala), (select top 1 id_musica from UsuarioMusicaSala where id_sala = S.id_sala order by ordem_sala desc))
+                        as id_musica
                         FROM sala s
                         OUTER APPLY (
                             SELECT TOP 1 mu.id_usuario
