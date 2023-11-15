@@ -50,7 +50,7 @@ foreach($salas as $sala) {
         $stmt = $conn->prepare(
             "SELECT u.email from UsuarioMusicaSala ms inner join Usuario u 
             on u.id_usuario = ms.id_usuario 
-            where ms.id_sala = :sala and u.status = 1");
+            where ms.id_sala = :sala and u.status = 0");
         $stmt->bindParam(':sala', $sala['id_sala']);
         $stmt->execute();
 
