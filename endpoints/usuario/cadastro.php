@@ -59,7 +59,6 @@
   }
   
   try {
-    echo json_encode($vars);
     $cadastro->cadastra($conn);
     http_response_code(200);
     echo json_encode(
