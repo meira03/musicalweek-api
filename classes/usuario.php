@@ -404,11 +404,10 @@
     }
 
     public function atualiza($conn, $idUsuario, $icon) {
-      $query = "UPDATE Usuario SET nome = :nome, username = :username, icon = :icon,data_nasc = :data_nasc WHERE id_usuario = :idUsuario";
+      $query = "UPDATE Usuario SET nome = :nome, username = :username, data_nasc = :data_nasc WHERE id_usuario = :idUsuario";
       $stmt = $conn->prepare($query);
       $stmt->bindParam(":nome", $this->nome);
       $stmt->bindParam(":username", $this->nick);
-      $stmt->bindParam(":icon", $icon);
       $stmt->bindParam(":data_nasc", $this->dataNasc);
       $stmt->bindParam(":idUsuario", $idUsuario);
 
