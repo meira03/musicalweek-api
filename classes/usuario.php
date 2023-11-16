@@ -474,8 +474,8 @@
       $query = 
         "UPDATE Usuario SET 
           nome = null, 
-          username = null, 
-          icon = null, 
+          username = 'deletado', 
+          icon = 'icone2.png', 
           data_nasc = null, 
           email = null, 
           senha = null, 
