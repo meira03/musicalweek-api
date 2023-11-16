@@ -81,11 +81,11 @@ foreach($salas as $sala) {
             $mail->CharSet = 'UTF-8';
             $mail->Subject = 'A sala começou'; 
             $mail->Body = 
-            '<div style="background-color: black; padding: 20px; text-align: center; border-radius: 10px; box-shadow: 0 0 10px #14defa; font-family: \'Arial\', \'Helvetica\', sans-serif;">
+            '<div style="max-width: 600px; background-color: black; padding: 20px; text-align: center; border-radius: 10px; box-shadow: 0 0 10px #14defa; font-family: \'Arial\', \'Helvetica\', sans-serif;">
                 <h1 style="color: #14defa; text-transform: uppercase;">SALA PADRÃO INICIADA!</h1>
                 
                 <button style="background-color: #14defa; color: white; font-weight: bold; padding: 10px 0; border: none; cursor: pointer; width: 100%;">
-                    <a href="musicalweek.azurewebsites.net/pt/sala/' . $sala['id_sala'] . '/1" style="color: white; text-decoration: none; display: block;">ENTRAR</a>
+                    <a href="https://musicalweek.azurewebsites.net/pt/sala/' . $sala['id_sala'] . '/1" style="color: white; text-decoration: none; display: block;">ENTRAR</a>
                 </button>
         
                 <div style="margin-top: 20px; border-top: 2px solid #14defa; padding-top: 10px;">

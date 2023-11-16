@@ -211,11 +211,12 @@
                 return array('codigo' => 3);
             } else {
                 $stmt->nextRowset();
+                $musica['avaliacoes'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 if($musica['nota_usuario'] === null){
-                    $musica['avaliacoes'] = array();
                     $musica['pontuacao'] = null;
-                } else {
-                    $musica['avaliacoes'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    foreach ($musica['avaliacoes'] as &$avaliacoes) {
+                        $avaliacoes['nota'] = null;
+                    }
                 }
                 return $musica;
             }
